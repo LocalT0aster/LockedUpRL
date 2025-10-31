@@ -10,7 +10,9 @@ var cell_size : float
 var active = false
 var alt_held = false
 
+
 @export_enum("CHASER", "RUNNER") var character: String = "RUNNER"
+@export var vision_size := Vector2i(5,5)
 
 var key_dict := {
 	KEY_UP: Vector2i.UP,
@@ -23,7 +25,8 @@ var key_dict := {
 func _ready() -> void:
 	cell_size = float(world.tile_set.tile_size.x)
 	world.set_cell(world.local_to_map(position), 0, Global.tiles[character], 0)
-	print(Global.get_state(world, Rect2i(world.local_to_map(position),Vector2i(5,5))))
+	print(world.local_to_map(position) - vision_size / 2)
+	print(Global.get_state(world, Rect2i(world.local_to_map(position) - vision_size / 2,vision_size)))
 
 func _unhandled_input(event: InputEvent) -> void:
 	if !active: return
