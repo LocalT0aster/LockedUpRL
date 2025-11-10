@@ -6,6 +6,7 @@ signal finished_turn
 
 
 @export var world : TileMapLayer
+@export var vision : TileMapLayer
 var cell_size : float
 var active = false
 var alt_held = false
@@ -21,12 +22,12 @@ var key_dict := {
 	KEY_DOWN: Vector2i.DOWN
 }
 
-
 func _ready() -> void:
 	cell_size = float(world.tile_set.tile_size.x)
 	world.set_cell(world.local_to_map(position), 0, Global.tiles[character], 0)
-	print(world.local_to_map(position) - vision_size / 2)
-	print(Global.get_state(world, Rect2i(world.local_to_map(position) - vision_size / 2,vision_size)))
+	vision.update_vision(world, Rect2i(world.local_to_map(position) - vision_size / 2,vision_size))
+	#print(world.local_to_map(position) - vision_size / 2)
+	#print(Global.get_state(vision, world.get_used_rect()))
 
 func _unhandled_input(event: InputEvent) -> void:
 	if !active: return
@@ -49,6 +50,7 @@ func place(direction : Vector2i):
 	if world.get_cell_atlas_coords(Vector2i(place_position_cells)) == Global.tiles.EMPTY:
 		world.set_cell(place_position_cells, 0, Global.tiles.BLOCK, 0)
 		world.update_astar()
+		vision.update_vision(world, Rect2i(world.local_to_map(position) - vision_size / 2,vision_size))
 		finished_turn.emit(get_index())
 	check_chaser_win()
 
@@ -59,6 +61,7 @@ func go(direction : Vector2i):
 		position += direction * cell_size
 		world.set_cell(world.local_to_map(position), 0, Global.tiles[character], 0)
 		world.update_astar()
+		vision.update_vision(world, Rect2i(world.local_to_map(position) - vision_size / 2,vision_size))
 		finished_turn.emit(get_index())
 	check_runner_win(new_position_cells)
 	check_chaser_win()

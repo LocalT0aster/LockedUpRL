@@ -6,6 +6,7 @@ signal chaser_won
 signal runner_won
 
 var tiles := {
+	"UNKNOWN": Vector2i(0,2),
 	"EMPTY": Vector2i(-1,-1),
 	"BLOCK": Vector2i(0,0),
 	"CHASER": Vector2i(0,1),
@@ -14,6 +15,7 @@ var tiles := {
 }
 
 var state_dict := {
+	Vector2i(0, 2): -1,#"UNKNOWN"
 	Vector2i(-1,-1) : 0,#"EMPTY" or floor
 	Vector2i(0,0): 1,#"BLOCK"
 	Vector2i(0,1): 2,#"CHASER"
