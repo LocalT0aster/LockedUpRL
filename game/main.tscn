@@ -64,6 +64,7 @@ vision = NodePath("../../chaser_tilemap")
 character = "CHASER"
 
 [node name="Camera2D" type="Camera2D" parent="."]
+offset = Vector2(256, 256)
 script = ExtResource("2_0xm2m")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
