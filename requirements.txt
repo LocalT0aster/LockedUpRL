@@ -1,0 +1,5 @@
+# Core RL dependencies
+torch>=2.9,<2.10
+#torchvision>=0.24,<0.25
+numpy>=1.23,<2.0
+pygame>=2.6,<2.7

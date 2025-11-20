@@ -977,8 +977,13 @@ def play_loop():
 # ============================
 # main
 # ============================
-if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1].lower() == "train":
+def main(argv=None):
+    args = sys.argv[1:] if argv is None else list(argv)
+    if args and args[0].lower() == "train":
         train_dqn(EPISODES)
     else:
         play_loop()
+
+
+if __name__ == "__main__":
+    main()
