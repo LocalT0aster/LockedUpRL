@@ -1,3 +1,3 @@
-import rl
+import rl.escape_game
 
-rl.main()
+rl.escape_game.main()
