@@ -5,8 +5,6 @@ signal chaser_won
 @warning_ignore("unused_signal")
 signal runner_won
 
-var cell_size : float = 16.0
-
 var tiles := {
 	"UNKNOWN": Vector2i(0,2),
 	"EMPTY": Vector2i(-1,-1),
