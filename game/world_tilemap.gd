@@ -7,7 +7,7 @@ var astar = AStarGrid2D.new()
 #var path = PackedVector2Array()
 @export var rect : Rect2i = Rect2i(Vector2i.ZERO, Vector2i(32,32))
 @export var wall_chance : float = 0.1
-@export var exit_chance : float = 0.1
+@export var exit_chance : float
 @export var exit_ammount : int = 1
 
 func _ready():

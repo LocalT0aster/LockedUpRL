@@ -36,6 +36,8 @@ tile_set = SubResource("TileSet_7dm0k")
 [node name="world_tilemap" type="TileMapLayer" parent="."]
 tile_set = SubResource("TileSet_7dm0k")
 script = ExtResource("3_7mycd")
+exit_chance = 0.03
+exit_ammount = 3
 
 [node name="runner_tilemap" type="TileMapLayer" parent="."]
 visible = false
