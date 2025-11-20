@@ -20,11 +20,6 @@ config/icon="res://icon.svg"
 
 Global="*res://other/global.gd"
 
-[display]
-
-window/size/viewport_width=1920
-window/size/viewport_height=1080
-
 [input]
 
 alt={

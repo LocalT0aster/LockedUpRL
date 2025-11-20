@@ -2,7 +2,7 @@ extends Label
 
 @export var agents : Node2D
 
-func _ready() -> void:
+func start():
 	agents.next_turn.connect(change_text)
 	change_text(0)
 
