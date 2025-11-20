@@ -29,9 +29,10 @@ func generate():
 			if randf() <= wall_chance:
 				set_cell(Vector2i(i,j),0,Global.tiles.BLOCK,0)
 				continue
-			if randf() <= exit_chance and exit_ammount > 0:
-				exit_ammount -= 1
-				set_cell(Vector2i(i,j),0,Global.tiles.EXIT,0)
+	for i in exit_ammount:
+		var coord = Vector2i(randi_range(1,rect.size.x-2),randi_range(1,rect.size.y-2))
+		set_cell(coord,0,Global.tiles.EXIT,0)
+
 
 func update_astar():
 	for i in range(astar.region.position.x, astar.region.end.x):
