@@ -5,9 +5,12 @@ signal chaser_won
 @warning_ignore("unused_signal")
 signal runner_won
 
+const TILE_SIZE = 16.0
+
 var tiles := {
 	"UNKNOWN": Vector2i(0,2),
 	"EMPTY": Vector2i(-1,-1),
+	"FLOOR": Vector2i(2,1),
 	"BLOCK": Vector2i(0,0),
 	"CHASER": Vector2i(0,1),
 	"RUNNER": Vector2i(1,1),
@@ -16,7 +19,8 @@ var tiles := {
 
 var state_dict := {
 	Vector2i(0, 2): -1,#"UNKNOWN"
-	Vector2i(-1,-1) : 0,#"EMPTY" or floor
+	Vector2i(-1,-1) : 0,#"EMPTY"
+	Vector2i(2,1): 0, #"FLOOR"
 	Vector2i(0,0): 1,#"BLOCK"
 	Vector2i(0,1): 2,#"CHASER"
 	Vector2i(1,1): 3,#"RUNNER"

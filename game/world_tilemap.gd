@@ -7,10 +7,13 @@ var astar = AStarGrid2D.new()
 #var path = PackedVector2Array()
 @export var rect : Rect2i = Rect2i(Vector2i.ZERO, Vector2i(32,32))
 @export var wall_chance : float = 0.1
-@export var exit_chance : float
 @export var exit_ammount : int = 1
+@export var chaser_ammount : int = 3
 
 func _ready():
+	pass
+
+func start():
 	generate()
 	astar.region = get_used_rect()
 	astar.cell_size = tile_set.tile_size
@@ -26,12 +29,24 @@ func generate():
 			if i == 0 or j == 0 or i == rect.size.x-1 or j == rect.size.y-1:
 				set_cell(Vector2i(i,j),0,Global.tiles.BLOCK,0)
 				continue
+			set_cell(Vector2i(i,j),0,Global.tiles.FLOOR,0)
 			if randf() <= wall_chance:
 				set_cell(Vector2i(i,j),0,Global.tiles.BLOCK,0)
 				continue
 	for i in exit_ammount:
-		var coord = Vector2i(randi_range(1,rect.size.x-2),randi_range(1,rect.size.y-2))
+		var cells = get_used_cells_by_id(0,Global.tiles.FLOOR,0)
+		cells.shuffle()
+		var coord = cells[0]
 		set_cell(coord,0,Global.tiles.EXIT,0)
+	for i in chaser_ammount:
+		var cells = get_used_cells_by_id(0,Global.tiles.FLOOR,0)
+		cells.shuffle()
+		var coord = cells[0]
+		set_cell(coord,0,Global.tiles.CHASER,0)
+	var r_cells = get_used_cells_by_id(0,Global.tiles.FLOOR,0)
+	r_cells.shuffle()
+	var r_coord = r_cells[0]
+	set_cell(r_coord,0,Global.tiles.RUNNER,0)
 
 
 func update_astar():
@@ -39,7 +54,7 @@ func update_astar():
 		for j in range(astar.region.position.y, astar.region.end.y):
 			var pos = Vector2i(i, j)
 			if (
-				get_cell_atlas_coords(pos) != Global.tiles.EMPTY
+				get_cell_atlas_coords(pos) != Global.tiles.FLOOR
 			) and (
 				get_cell_atlas_coords(pos) != Global.tiles.EXIT
 			):
