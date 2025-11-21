@@ -11,7 +11,6 @@ signal next_turn(index: int)
 func start():
 	spawn_agents()
 	for child : Agent in get_children():
-		print(child.position)
 		child.finished_turn.connect(_on_child_fished_turn)
 	get_child(0).active = true
 
