@@ -9,6 +9,7 @@ signal finished_turn
 @export var vision : TileMapLayer
 var active = false
 var alt_held = false
+var manual_control = false
 
 
 @export_enum("CHASER", "RUNNER") var character: String = "RUNNER"
@@ -28,7 +29,7 @@ func _ready() -> void:
 	#print(Global.get_state(vision, world.get_used_rect()))
 
 func _unhandled_input(event: InputEvent) -> void:
-	if !active: return
+	if !active or !manual_control: return
 	if Input.is_action_pressed("ui_cancel"):
 		finished_turn.emit(get_index())
 		return
@@ -42,6 +43,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				place(key_dict[event.keycode])
 			else:
 				go(key_dict[event.keycode])
+
+func step(input: StringName) -> void:
+	
 
 func place(direction : Vector2i):
 	var place_position_cells := world.local_to_map(global_position) + direction
