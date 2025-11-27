@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import math
-import time
 import random
 import heapq
-from collections import deque, defaultdict
+from collections import deque
 
 import numpy as np
 
@@ -22,35 +20,45 @@ except Exception:
 # ============================
 # КОНФИГ
 # ============================
+
 GRID_SIZE = 32
 CELL_SIZE = 20
 
-VISIBILITY_RADIUS = 2           # видимость обоих типов агентов (5x5)
-WALL_SPAWN_CHANCE = 0.10        # 10% шанс стены на пустых клетках внутри
-MAX_TURNS = 450                 # по ТЗ: ничья после 500 ходов раннера
-NUM_EXITS = 3
-NUM_CATCHERS = 3
+# ОБЗОР И ВИДИМОСТЬ: 5x5
+LOCAL_RADIUS = 2             # окно 5×5 вокруг ловца
+VISIBILITY_RADIUS = 2        # зона видимости (Chebyshev) для раннера и ловцов
 
-EPISODES = 10000                 # рекомендуемо 5k+; для выигрыша над человеком — 10k-20k
+WALL_SPAWN_CHANCE = 0.08    # шанс стены на пустых клетках внутри
+MAX_TURNS = 380              # ничья после MAX_TURNS ходов раннера
+NUM_EXITS = 2
+NUM_CATCHERS = 2
+
+EPISODES = 9000             # количество эпизодов обучения
 SEED = 42
-ID_BITS = 3  # фиксированный размер one-hot ID блокера (макс. число ловцов в финальной задаче)
+ID_BITS = 3                  # фиксированный размер one-hot ID блокера (макс. число ловцов)
+
+# Минимальная BFS-дистанция раннера до ближайшего выхода при спавне
+# Меняй по этапам curriculum:
+# A: 8, B: 6/7, C1: 6, C2: 4, C3: 0
+MIN_SPAWN_BFS = 8
 
 # Папки
 MODELS_DIR = "models"
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 # Цвета (pygame)
-COLOR_WALL   = (100, 100, 100)
-COLOR_EXIT   = (0, 255, 0)
-COLOR_RUNNER = (0, 0, 255)
-COLOR_CATCHER= (255, 0, 0)
-COLOR_BLOCK  = (150, 75, 0)
-COLOR_BG     = (240, 240, 240)
-COLOR_VIS    = (200, 200, 255, 50)
+COLOR_WALL    = (100, 100, 100)
+COLOR_EXIT    = (0, 255, 0)
+COLOR_RUNNER  = (0, 0, 255)
+COLOR_CATCHER = (255, 0, 0)
+COLOR_BLOCK   = (150, 75, 0)
+COLOR_BG      = (240, 240, 240)
+COLOR_VIS     = (200, 200, 255, 50)
 
 # ============================
-# DQN: Double+Dueling
+# DQN: Double + Dueling
 # ============================
+
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
         super().__init__()
@@ -62,10 +70,14 @@ class DQN(nn.Module):
             nn.ReLU(),
         )
         self.adv = nn.Sequential(
-            nn.Linear(hidden, 256), nn.ReLU(), nn.Linear(256, output_size)
+            nn.Linear(hidden, 256),
+            nn.ReLU(),
+            nn.Linear(256, output_size)
         )
         self.val = nn.Sequential(
-            nn.Linear(hidden, 256), nn.ReLU(), nn.Linear(256, 1)
+            nn.Linear(hidden, 256),
+            nn.ReLU(),
+            nn.Linear(256, 1)
         )
 
     def forward(self, x):
@@ -73,6 +85,7 @@ class DQN(nn.Module):
         A = self.adv(f)
         V = self.val(f)
         return V + A - A.mean(dim=1, keepdim=True)
+
 
 class DQNAgent:
     def __init__(self, state_size, action_size, device=None):
@@ -82,10 +95,11 @@ class DQNAgent:
 
         self.memory = deque(maxlen=100_000)
         self.gamma = 0.99
-        self.n = 3                      # <<<<<< n-step
+        self.n = 3                      # n-step
         self.n_buffer = deque(maxlen=self.n)
 
-        self.lr = 5e-5
+        # Гиперпараметры (меняй под этапы)
+        self.lr = 1e-4
         self.batch_size = 128
         self.learn_starts = 2000
         self.learn_every = 4
@@ -94,7 +108,7 @@ class DQNAgent:
         self.step_count = 0
         self.epsilon = 1.0
         self.eps_end = 0.05
-        self.eps_decay_steps = 2_000_000 # было 200 000
+        self.eps_decay_steps = 2_000_000  # изменяй по плану A/B/C
 
         self.model = DQN(state_size, action_size).to(self.device)
         self.target_model = DQN(state_size, action_size).to(self.device)
@@ -111,30 +125,48 @@ class DQNAgent:
                 for p, tp in zip(self.model.parameters(), self.target_model.parameters()):
                     tp.data.copy_(tau * p.data + (1 - tau) * tp.data)
 
-    def act(self, state, valid_mask=None):
+    def act(self, state, valid_mask=None, eval_mode=False):
+        """
+        eval_mode = False  -> ε-жадная стратегия (обучение)
+        eval_mode = True   -> чисто жадная стратегия (оценка / игра), без изменения epsilon/step_count
+        """
+        # ----- ЧИСТО ЖАДНЫЙ РЕЖИМ (оценка / игра) -----
+        if eval_mode:
+            s = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
+            with torch.no_grad():
+                q = self.model(s)
+                if valid_mask is not None:
+                    if isinstance(valid_mask, np.ndarray):
+                        mask = torch.from_numpy(valid_mask.astype(np.bool_)).to(self.device)
+                    else:
+                        mask = torch.tensor(valid_mask, dtype=torch.bool, device=self.device)
+                    if mask.sum().item() == 0:
+                        return self.action_size - 1  # STAY
+                    q = q.masked_fill((~mask).unsqueeze(0), -1e9)
+            return int(q.argmax(dim=1).item())
+
+        # ----- ОБУЧЕНИЕ: ε-жадная стратегия -----
         self.step_count += 1
         self.epsilon = max(self.eps_end, 1.0 - self.step_count / self.eps_decay_steps)
+
         if random.random() < self.epsilon:
             if valid_mask is not None:
                 valid_idx = np.flatnonzero(valid_mask)
                 return int(random.choice(valid_idx)) if len(valid_idx) > 0 else random.randrange(self.action_size)
             return random.randrange(self.action_size)
+
         s = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
         with torch.no_grad():
-            q = self.model(s)  # [1, action_size]
+            q = self.model(s)
             if valid_mask is not None:
-                # гарантируем bool и расширяем до [1, action_size]
                 if isinstance(valid_mask, np.ndarray):
                     mask = torch.from_numpy(valid_mask.astype(np.bool_)).to(self.device)
                 else:
                     mask = torch.tensor(valid_mask, dtype=torch.bool, device=self.device)
                 if mask.sum().item() == 0:
-                    # на всякий случай: если вдруг все действия запрещены — выбираем STAY (последний)
                     return self.action_size - 1
-                # заполняем запрещённые действия большим минусом
                 q = q.masked_fill((~mask).unsqueeze(0), -1e9)
         return int(q.argmax(dim=1).item())
-
 
     # ---- n-step вспомогательные методы ----
     def _append_nstep(self, transition):
@@ -149,7 +181,6 @@ class DQNAgent:
         return (s0, a0, R, ns, d)
 
     def remember(self, s, a, r, ns, done):
-        # сохраняем n-step версию
         t = (s, a, r, ns, done)
         nstep_t = self._append_nstep(t)
         if nstep_t is not None:
@@ -171,7 +202,7 @@ class DQNAgent:
         with torch.no_grad():
             next_best = self.model(ns).argmax(dim=1, keepdim=True)
             next_q = self.target_model(ns).gather(1, next_best).squeeze(1)
-            target = r + (1 - d) * (self.gamma ** self.n) * next_q   # <<<<<< n-step target
+            target = r + (1 - d) * (self.gamma ** self.n) * next_q
 
         q = self.model(s).gather(1, a).squeeze(1)
         loss = self.loss_fn(q, target)
@@ -185,7 +216,6 @@ class DQNAgent:
             self.update_target(hard=False)
 
     def flush_nstep(self):
-        # выгружаем хвост n-step буфера при терминалке
         while len(self.n_buffer) > 0:
             R = 0.0
             for i, (_, _, r, _, _) in enumerate(self.n_buffer):
@@ -196,11 +226,9 @@ class DQNAgent:
             self.n_buffer.popleft()
 
 
-
 # ============================
 # Игровая логика
 # ============================
-LOCAL_RADIUS = 5  # окно 11×11 вокруг действующего блокера
 
 # 9 действий: 4 шага, 4 блокировки, стоять
 ACTIONS = [
@@ -222,13 +250,14 @@ def set_seed(seed=SEED):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
+
 class RunnerAgentBase:
     def get_action(self, game):
         raise NotImplementedError
 
+
 class HumanRunner(RunnerAgentBase):
     def get_action(self, game):
-        # ожидание стрелок; если pygame нет — просто стоим
         if pygame is None:
             return (0, 0)
         action = None
@@ -243,19 +272,17 @@ class HumanRunner(RunnerAgentBase):
                     elif event.key == pygame.K_RIGHT: action = (1, 0)
         return action
 
+
 class AStarRunner(RunnerAgentBase):
     def heuristic(self, a, b):
         return abs(a[0]-b[0]) + abs(a[1]-b[1])
 
     def get_action(self, game):
-        # раннер видит только 5x5 вокруг себя
         runner_pos = game.runner_pos
         visible = set(game.get_visibility(runner_pos, VISIBILITY_RADIUS))
 
-        # видимые выходы
         exits_vis = [e for e in game.exits if e in visible]
         if not exits_vis:
-            # нет выхода в зоне видимости — идём случайно, но валидно
             moves = game._get_valid_runner_moves(runner_pos)
             if moves:
                 return random.choice(moves)
@@ -271,7 +298,6 @@ class AStarRunner(RunnerAgentBase):
         while open_set:
             _, cost, cur = heapq.heappop(open_set)
             if cur == goal:
-                # первый шаг
                 while came_from.get(cur) not in (None, runner_pos) and cur != runner_pos:
                     cur = came_from[cur]
                 dx = cur[0] - runner_pos[0]
@@ -283,7 +309,6 @@ class AStarRunner(RunnerAgentBase):
             for dx, dy in [(0,1),(1,0),(0,-1),(-1,0)]:
                 nx, ny = cur[0]+dx, cur[1]+dy
                 nxt = (nx, ny)
-                # ограничение видимостью и проходимостью
                 if nxt in visible and game._cell_free_for_runner(nxt):
                     nc = cost + 1
                     if nxt not in g or nc < g[nxt]:
@@ -292,11 +317,11 @@ class AStarRunner(RunnerAgentBase):
                         pr = nc + self.heuristic(nxt, goal)
                         heapq.heappush(open_set, (pr, nc, nxt))
 
-        # fallback
         moves = game._get_valid_runner_moves(runner_pos)
         if moves:
             return random.choice(moves)
         return (0, 0)
+
 
 class EscapeGame:
     """
@@ -315,6 +340,10 @@ class EscapeGame:
         self.catchers = []
         self.runner_pos = None
 
+        # shared map: -1 unknown, 0 empty, 1 wall, 2 block, 3 exit
+        self.shared_map = np.full((GRID_SIZE, GRID_SIZE), -1, dtype=np.int8)
+        self.last_seen_runner = None  # (x, y) или None
+
         # ход/счётчики
         self.turn = 0  # 0 - runner; 1..NUM_CATCHERS - индексы блокеров+1
         self.runner_turns = 0
@@ -325,30 +354,32 @@ class EscapeGame:
         # агенты
         self.runner_agent = HumanRunner() if runner_type == "human" else AStarRunner()
 
-        # DQN для блокеров (только у catchers)
         self.dqn_catchers = None
         self.state_size = self._dqn_state_size()
         self.action_size = len(ACTIONS)
 
         if train_mode or load_dqn_for_play:
             self.dqn_catchers = DQNAgent(self.state_size, self.action_size)
-            # в режиме play (не train) — грузим лучшую и фиксируем eps=0
             if load_dqn_for_play:
                 self.dqn_catchers.epsilon = 0.0
                 best_path = os.path.join(MODELS_DIR, "dqn_best.pth")
                 if os.path.exists(best_path):
-                    chk = torch.load(best_path, map_location='cpu')
-                    self.dqn_catchers.model.load_state_dict(chk['model_state_dict'])
-                    self.dqn_catchers.update_target(hard=True)
-                    print("Загружена dqn_best.pth")
+                    try:
+                        chk = torch.load(best_path, map_location='cpu')
+                        self.dqn_catchers.model.load_state_dict(chk['model_state_dict'])
+                        self.dqn_catchers.update_target(hard=True)
+                        print("Загружена dqn_best.pth")
+                    except RuntimeError as e:
+                        print("[WARN] Не удалось загрузить dqn_best.pth (скорее всего, другая архитектура).")
+                        print("       Сообщение PyTorch:", e)
+                        print("       Продолжаем с не обученной моделью.")
                 else:
                     print("Не найден models/dqn_best.pth — играем без обученной модели")
 
-        # внутренняя книга учёта для шейпинга
         self.blocked_exits = set()
 
-        # построить доску
         self._setup_board()
+        self._refresh_shared_map_all()
 
     # ---------- генерация карты ----------
     def _setup_board(self):
@@ -362,7 +393,7 @@ class EscapeGame:
                 if self.rng.random() < WALL_SPAWN_CHANCE:
                     self.grid[y, x] = 1
 
-        # выходы: только внутри 30x30 (т.е. 1..GRID_SIZE-2)
+        # выходы
         self.exits = []
         attempts = 0
         while len(self.exits) < NUM_EXITS and attempts < 5000:
@@ -374,18 +405,17 @@ class EscapeGame:
 
         # блокеры
         self.catchers = self._place_random(NUM_CATCHERS, avoid=set(self.exits))
-        # раннер
+
+        # раннер с контролем минимального BFS до выхода
         avoid = set(self.exits) | set(self.catchers)
         self.runner_pos = self._place_random(1, avoid=avoid)[0]
         min_bfs = self._runner_to_nearest_exit_dist()
         tries = 0
-        while (min_bfs is None or min_bfs < 0) and tries < 2000:
-            # переставим только раннера (или всю карту, на твой выбор)
+        while (min_bfs is None or (MIN_SPAWN_BFS and (min_bfs < MIN_SPAWN_BFS))) and tries < 5000:
             avoid = set(self.exits) | set(self.catchers)
             self.runner_pos = self._place_random(1, avoid=avoid)[0]
             min_bfs = self._runner_to_nearest_exit_dist()
             tries += 1
-
 
     def _place_random(self, count, avoid=None):
         avoid = set() if avoid is None else set(avoid)
@@ -448,7 +478,6 @@ class EscapeGame:
         return moves
 
     def is_runner_surrounded_by_blocks(self):
-        # окружён блоками/стенами с 4 сторон (catchers не считаем блоком)
         x, y = self.runner_pos
         for dx, dy in [(0,1),(1,0),(0,-1),(-1,0)]:
             nx, ny = x+dx, y+dy
@@ -456,11 +485,9 @@ class EscapeGame:
                 if self.grid[ny, nx] == 0:
                     return False
             else:
-                # за пределами поля — считаем как стена
                 continue
         return True
 
-    # BFS расстояние с учётом стен и catchers как препятствий
     def _bfs_distance(self, start, targets):
         if not targets:
             return None
@@ -468,7 +495,7 @@ class EscapeGame:
         sx, sy = start
         if (sx, sy) in tx:
             return 0
-        blocked = set(self.catchers)  # ловцы — препятствия
+        blocked = set(self.catchers)
         visited = np.zeros((GRID_SIZE, GRID_SIZE), dtype=bool)
         q = deque([(sx, sy, 0)])
         visited[sy, sx] = True
@@ -494,42 +521,85 @@ class EscapeGame:
         d = self._bfs_distance(self.runner_pos, self.exits)
         return None if d is None else float(d)
 
+    # ---------- shared map ----------
+    def _cell_base_type(self, x, y):
+        """Базовый тип клетки без учёта агентов: 0 пусто, 1 стена, 2 блок, 3 выход."""
+        if self.grid[y, x] == 1: return 1
+        if self.grid[y, x] == 2: return 2
+        if (x, y) in self.exits: return 3
+        return 0
+
+    def _update_shared_map_from_catcher(self, idx):
+        """Обновить shared_map по 5x5 видимости конкретного ловца."""
+        cx, cy = self.catchers[idx]
+        for (x, y) in self.get_visibility((cx, cy), VISIBILITY_RADIUS):
+            self.shared_map[y, x] = self._cell_base_type(x, y)
+        vis = self.get_combined_catcher_visibility()
+        if self.runner_pos in vis:
+            self.last_seen_runner = self.runner_pos
+
+    def _refresh_shared_map_all(self):
+        """Пересчитать shared_map объединением наблюдений всех ловцов."""
+        for i in range(len(self.catchers)):
+            self._update_shared_map_from_catcher(i)
+
     # ---------- DQN состояние ----------
     def _dqn_state_size(self):
-        channels = 6  # wall, block, exit, runner, other_catcher, self
-        W = 2*LOCAL_RADIUS + 1
+        channels = 7  # wall, block, exit, runner, other_catcher, self, unk
+        W = 2*LOCAL_RADIUS + 1      # 5
         local = W*W*channels
-        global_feats = 8 + ID_BITS  # см. ниже
+        global_feats = 8 + ID_BITS
         return local + global_feats
 
     def _state_for_catcher(self, idx):
         cx, cy = self.catchers[idx]
         W = 2*LOCAL_RADIUS + 1
-        state = np.zeros((W, W, 6), dtype=np.float32)
+        C = 7  # wall, block, exit, runner, other_catcher, self, unk
+        state = np.zeros((W, W, C), dtype=np.float32)
+
+        combined_vis = set(self.get_combined_catcher_visibility())
+        runner_is_visible = (self.runner_pos in combined_vis)
 
         for dy in range(-LOCAL_RADIUS, LOCAL_RADIUS+1):
             for dx in range(-LOCAL_RADIUS, LOCAL_RADIUS+1):
                 x, y = cx+dx, cy+dy
                 ix, iy = dx+LOCAL_RADIUS, dy+LOCAL_RADIUS
+
                 if not (0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE):
-                    state[iy, ix, 0] = 1.0  # за границами — как стены
+                    state[iy, ix, 0] = 1.0  # границы считаем стеной
                     continue
-                if self.grid[y, x] == 1: state[iy, ix, 0] = 1.0
-                if self.grid[y, x] == 2: state[iy, ix, 1] = 1.0
-                if (x, y) in self.exits:  state[iy, ix, 2] = 1.0
-                if (x, y) == self.runner_pos: state[iy, ix, 3] = 1.0
+
+                cell = self.shared_map[y, x]  # -1,0,1,2,3
+                if cell == -1:
+                    state[iy, ix, 6] = 1.0  # unknown
+                elif cell == 0:
+                    pass
+                elif cell == 1:
+                    state[iy, ix, 0] = 1.0  # wall
+                elif cell == 2:
+                    state[iy, ix, 1] = 1.0  # block
+                elif cell == 3:
+                    state[iy, ix, 2] = 1.0  # exit
+
+                if runner_is_visible and (x, y) == self.runner_pos:
+                    state[iy, ix, 3] = 1.0
+
                 if (x, y) in self.catchers and (x, y) != (cx, cy):
                     state[iy, ix, 4] = 1.0
-        state[LOCAL_RADIUS, LOCAL_RADIUS, 5] = 1.0  # сам
+
+        state[LOCAL_RADIUS, LOCAL_RADIUS, 5] = 1.0
 
         flat = state.flatten()
 
         rx, ry = self.runner_pos
-        rel_dx = (rx - cx) / GRID_SIZE
-        rel_dy = (ry - cy) / GRID_SIZE
-        runner_visible = 1.0 if (self.runner_pos in self.get_combined_catcher_visibility()) else 0.0
+        if runner_is_visible:
+            rel_dx = (rx - cx) / GRID_SIZE
+            rel_dy = (ry - cy) / GRID_SIZE
+        else:
+            rel_dx = 0.0
+            rel_dy = 0.0
+        runner_visible = 1.0 if runner_is_visible else 0.0
 
-        # ближайший к раннеру выход (по L1 — дешёво; BFS для награды)
         if self.exits:
             ex = min(self.exits, key=lambda e: abs(e[0]-rx)+abs(e[1]-ry))
         else:
@@ -583,63 +653,57 @@ class EscapeGame:
             pass  # stay
         return did_block, block_pos, invalid
 
-    # ---------- награда для одного блокера ----------
+    # ---------- награда ----------
     def _reward_for_catcher(self, idx, did_block, block_pos, invalid, prev):
-        # Базовый тайм‑штраф
-        reward = -0.8
+        reward = -0.8  # базовый временной штраф
 
-        # Приближение/удаление к раннеру
         new_dist = self._manhattan(self.catchers[idx], self.runner_pos)
-        if new_dist < prev['dist_to_runner']: reward += 5.0
-        elif new_dist > prev['dist_to_runner']: reward -= 5.0
+        if new_dist < prev['dist_to_runner']:
+            reward += 7.0
+        elif new_dist > prev['dist_to_runner']:
+            reward -= 6.0
 
-        # Блоки
         if did_block:
             runner_vis = set(self.get_visibility(self.runner_pos))
-            # В зоне видимости раннера — «давление»
-            if block_pos in runner_vis: reward += 10.0
-            else: reward -= 30.0  # вне видимости — плохо
+            if block_pos in runner_vis:
+                reward += 15.0
+            else:
+                reward -= 40.0
 
-            # Перекрыт выход
             if block_pos in self.exits and block_pos not in self.blocked_exits:
-                reward += 120.0
+                reward += 150.0
                 self.blocked_exits.add(block_pos)
 
-            # Сужение достижимого пространства для раннера (BFS; ловцы как стены)
             cur_reach = self._reachable_cells_for_runner()
             reduction = prev['reachable'] - cur_reach
             if reduction > 0:
-                reward += min(100.0, 30.0 + 2.0 * reduction)
+                reward += min(120.0, 40.0 + 3.0 * reduction)
             else:
-                reward -= 20.0  # блок «впустую»
+                reward -= 20.0
 
-        # Попытка невалидного действия
         if invalid:
             reward -= 15.0
 
-        # Если нашей операцией путь раннера к выходу стал КОРОЧЕ — штраф
         new_runner_exit = self._runner_to_nearest_exit_dist()
         p = prev['runner_exit_dist']
         if p is not None and new_runner_exit is not None:
             if new_runner_exit < p:
-                # раннер приблизился к выходу — штраф
                 reward -= 50.0
             elif new_runner_exit > p:
-                # сделать выход дальше — лёгкий бонус
                 inc = new_runner_exit - p
                 reward += min(30.0, 10.0 + 5.0 * inc)
 
-        # Сам себя загнал
         cpos = self.catchers[idx]
-        free_neighbors = sum(1 for dx,dy in [(0,1),(1,0),(0,-1),(-1,0)]
-                             if self._valid_free(cpos[0]+dx, cpos[1]+dy))
+        free_neighbors = sum(
+            1 for dx,dy in [(0,1),(1,0),(0,-1),(-1,0)]
+            if self._valid_free(cpos[0]+dx, cpos[1]+dy)
+        )
         if free_neighbors <= 1:
             reward -= 50.0
 
         return reward
 
     def _reachable_cells_for_runner(self):
-        # BFS от позиции раннера; ловцы — препятствия
         x0, y0 = self.runner_pos
         visited = np.zeros((GRID_SIZE, GRID_SIZE), dtype=bool)
         q = deque([(x0, y0)])
@@ -659,12 +723,29 @@ class EscapeGame:
                 q.append((nx, ny))
         return cnt
 
+    # ---------- маска действий ----------
+    def _action_mask_for_catcher(self, idx):
+        mask = np.zeros(len(ACTIONS), dtype=np.uint8)
+        cx, cy = self.catchers[idx]
+        for i, (dx, dy, kind) in enumerate(ACTIONS):
+            if kind == 'move':
+                nx, ny = cx + dx, cy + dy
+                if self._valid_free(nx, ny):
+                    mask[i] = 1
+            elif kind == 'block':
+                bx, by = cx + dx, cy + dy
+                if (0 <= bx < GRID_SIZE and 0 <= by < GRID_SIZE and
+                    self.grid[by, bx] == 0 and (bx, by) != self.runner_pos and (bx, by) not in self.catchers):
+                    mask[i] = 1
+            else:  # stay
+                mask[i] = 1
+        return mask
+
     # ---------- один шаг игры ----------
     def step(self):
         if self.game_over:
             return 0.0
 
-        # Ничья по лимиту ХОДОВ РАННЕРА
         if self.runner_turns > MAX_TURNS:
             self.game_over = True
             self.winner_text = "Ничья"
@@ -680,30 +761,32 @@ class EscapeGame:
                 nx, ny = self.runner_pos[0]+dx, self.runner_pos[1]+dy
                 self.runner_pos = (nx, ny)
             elif moves:
-                # если нажал в стену/нет A* шага — идём случайно валидно
                 dx, dy = random.choice(moves)
                 self.runner_pos = (self.runner_pos[0]+dx, self.runner_pos[1]+dy)
-            # победа раннера
+
             if self.runner_pos in self.exits:
                 self.game_over = True
                 self.winner_text = "Победа Runner"
                 self.result = 'runner'
                 return 0.0
-            # окружён блоками
+
             if self.is_runner_surrounded_by_blocks():
                 self.game_over = True
                 self.winner_text = "Победа Catchers (runner окружён блоками)"
                 self.result = 'catchers'
                 return 0.0
 
+            self._refresh_shared_map_all()
+
             self.turn = 1
             return 0.0
 
-        # ====== ХОД CATCHERS (по одному) ======
+        # ====== ХОД CATCHERS ======
         idx = self.turn - 1
         reward = 0.0
 
-        # --- DQN-ветка ---
+        self._refresh_shared_map_all()
+
         if self.dqn_catchers is not None:
             prev = {
                 'dist_to_runner': self._manhattan(self.catchers[idx], self.runner_pos),
@@ -712,11 +795,16 @@ class EscapeGame:
             }
             state = self._state_for_catcher(idx)
             mask = self._action_mask_for_catcher(idx)
-            action_idx = self.dqn_catchers.act(state, valid_mask=mask)
+            action_idx = self.dqn_catchers.act(
+                state,
+                valid_mask=mask,
+                eval_mode=not self.train_mode
+            )
 
             did_block, block_pos, invalid = self._apply_catcher_action(idx, action_idx)
 
-            # ТЕРМИНАЛКА: прямо в этот же переход!
+            self._update_shared_map_from_catcher(idx)
+
             terminal = False
             term_bonus = 0.0
             if self.is_runner_surrounded_by_blocks():
@@ -726,7 +814,6 @@ class EscapeGame:
                 self.winner_text = "Победа Catchers"
                 self.result = 'catchers'
 
-            # (раннер в выходе на ходу блокера — маловероятно, но на всякий случай)
             if self.runner_pos in self.exits and not terminal:
                 terminal = True
                 term_bonus = -1000.0
@@ -745,13 +832,11 @@ class EscapeGame:
                 self.dqn_catchers.replay()
 
             if terminal:
-                # мягкое обновление таргет‑сети
                 self.dqn_catchers.update_target(hard=False)
                 return reward
 
-        # --- Эвристика (если DQN не инициализирован) ---
         else:
-            # простая преследующая эвристика + попытка блокировать по курсу
+            # простая эвристика
             rx, ry = self.runner_pos
             cx, cy = self.catchers[idx]
             best = None
@@ -770,11 +855,11 @@ class EscapeGame:
                 self.catchers[idx] = (cx+best[0], cy+best[1])
                 moved = True
             if not moved:
-                # ставим блок по направлению к цели
                 tx = 1 if rx > cx else -1 if rx < cx else 0
                 ty = 1 if ry > cy else -1 if ry < cy else 0
                 for dx, dy in [(tx,0),(0,ty),(tx,ty),(0,0)]:
-                    if dx==0 and dy==0: break
+                    if dx==0 and dy==0:
+                        break
                     bx, by = cx+dx, cy+dy
                     if self._place_block(bx, by):
                         break
@@ -785,15 +870,14 @@ class EscapeGame:
                 self.result = 'catchers'
                 return 0.0
 
-        # следующий ход
         self.turn = (self.turn + 1) % (NUM_CATCHERS + 1)
         return float(reward)
 
     # ---------- отрисовка ----------
     def render(self, screen, clock=None, extra_status=""):
-        if pygame is None: return
+        if pygame is None:
+            return
         screen.fill(COLOR_BG)
-        # клетки
         for y in range(GRID_SIZE):
             for x in range(GRID_SIZE):
                 r = pygame.Rect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE)
@@ -805,57 +889,41 @@ class EscapeGame:
                     pygame.draw.rect(screen, COLOR_EXIT, r)
                 pygame.draw.rect(screen, (220,220,220), r, 1)
 
-        # видимость объединённая — подсветим слегка
         vis = self.get_combined_catcher_visibility()
         for vx, vy in vis:
             s = pygame.Surface((CELL_SIZE, CELL_SIZE), pygame.SRCALPHA)
             s.fill(COLOR_VIS)
             screen.blit(s, (vx*CELL_SIZE, vy*CELL_SIZE))
 
-        # агенты
         for c in self.catchers:
-            pygame.draw.circle(screen, COLOR_CATCHER,
-                               (c[0]*CELL_SIZE + CELL_SIZE//2, c[1]*CELL_SIZE + CELL_SIZE//2),
-                               CELL_SIZE//3)
-        pygame.draw.circle(screen, COLOR_RUNNER,
-                           (self.runner_pos[0]*CELL_SIZE + CELL_SIZE//2, self.runner_pos[1]*CELL_SIZE + CELL_SIZE//2),
-                           CELL_SIZE//3)
+            pygame.draw.circle(
+                screen, COLOR_CATCHER,
+                (c[0]*CELL_SIZE + CELL_SIZE//2, c[1]*CELL_SIZE + CELL_SIZE//2),
+                CELL_SIZE//3
+            )
+        pygame.draw.circle(
+            screen, COLOR_RUNNER,
+            (self.runner_pos[0]*CELL_SIZE + CELL_SIZE//2, self.runner_pos[1]*CELL_SIZE + CELL_SIZE//2),
+            CELL_SIZE//3
+        )
 
-        # статус
         font = pygame.font.SysFont(None, 24)
         status = f"Ход раннера: {self.runner_turns}/{MAX_TURNS} | {self.winner_text or 'Игра идёт'} {extra_status}"
         text = font.render(status, True, (0,0,0))
         screen.blit(text, (10, GRID_SIZE*CELL_SIZE + 8))
-    
-    def _action_mask_for_catcher(self, idx):
-        mask = np.zeros(len(ACTIONS), dtype=np.uint8)
-        cx, cy = self.catchers[idx]
-        for i, (dx, dy, kind) in enumerate(ACTIONS):
-            if kind == 'move':
-                nx, ny = cx + dx, cy + dy
-                if self._valid_free(nx, ny):
-                    mask[i] = 1
-            elif kind == 'block':
-                bx, by = cx + dx, cy + dy
-                if (0 <= bx < GRID_SIZE and 0 <= by < GRID_SIZE and
-                    self.grid[by, bx] == 0 and (bx, by) != self.runner_pos and (bx, by) not in self.catchers):
-                    mask[i] = 1
-            else:  # stay
-                mask[i] = 1
-        return mask
 
 
 # ============================
-# Тренировка и игра
+# Тренировка
 # ============================
+
 def train_dqn(episodes=EPISODES):
     set_seed(SEED)
 
-    state_size = (2*LOCAL_RADIUS + 1)**2 * 6 + 8 + ID_BITS
+    state_size = (2*LOCAL_RADIUS + 1)**2 * 7 + 8 + ID_BITS
     action_size = len(ACTIONS)
     agent = DQNAgent(state_size, action_size)
 
-    # ---- попытка резюма ----
     resume_path = os.path.join(MODELS_DIR, "dqn_best.pth")
     if os.path.exists(resume_path):
         try:
@@ -863,7 +931,6 @@ def train_dqn(episodes=EPISODES):
             agent.model.load_state_dict(chk['model_state_dict'])
             if 'optimizer_state_dict' in chk:
                 agent.optimizer.load_state_dict(chk['optimizer_state_dict'])
-            # (рекомендуется) восстановить step_count для корректного eps-декрея:
             agent.step_count = chk.get('step_count', 0)
             agent.update_target(hard=True)
             print(f"Resumed from {resume_path} (epsilon in ckpt: {chk.get('epsilon','n/a')})")
@@ -874,31 +941,28 @@ def train_dqn(episodes=EPISODES):
     results = {'catchers': 0, 'runner': 0, 'draw': 0}
     moving_avg = deque(maxlen=100)
 
-    print(f"ОБУЧЕНИЕ: {episodes} эпизодов; общий агент: {agent.device}, eps-> {agent.eps_end}")
+    print(f"ОБУЧЕНИЕ: {episodes} эпизодов; устройство: {agent.device}, eps-> {agent.eps_end}")
 
     for ep in range(1, episodes + 1):
-        # новый эпизод = новая карта/спавн, но тот же agent
         game = EscapeGame(runner_type="astar", train_mode=True,
                           seed=random.randint(0, 10**9))
-        game.dqn_catchers = agent  # общий агент
+        game.dqn_catchers = agent
 
         total_reward, steps = 0.0, 0
         while not game.game_over:
             r = game.step()
             total_reward += r
             steps += 1
-            if steps > 100000:  # страховка от зависаний
+            if steps > 100000:
                 game.game_over = True
                 game.winner_text = "Ничья"
                 game.result = 'draw'
 
-        # ВАЖНО: закрыть n-step буфер для этого эпизода
         agent.flush_nstep()
 
         moving_avg.append(total_reward)
         results[game.result] += 1
 
-        # сохранение лучшего по суммарной награде
         if total_reward > best_total:
             best_total = total_reward
             path = os.path.join(MODELS_DIR, "dqn_best.pth")
@@ -907,7 +971,6 @@ def train_dqn(episodes=EPISODES):
                 'optimizer_state_dict': agent.optimizer.state_dict(),
                 'epsilon': agent.epsilon,
                 'total_reward': total_reward,
-                # (рекомендуется) сохранять step_count для корректного резюма
                 'step_count': agent.step_count,
             }, path)
 
@@ -922,12 +985,93 @@ def train_dqn(episodes=EPISODES):
     print("Лучшая модель сохранена в models/dqn_best.pth")
 
 
+# ============================
+# Оценка (evaluate)
+# ============================
+
+def evaluate(num_episodes=300, runner_type="astar"):
+    """
+    Оценивает текущую лучшую модель (models/dqn_best.pth) без обучения.
+    Используется greedy-политика (eval_mode=True).
+    """
+    set_seed(SEED)
+
+    state_size = (2*LOCAL_RADIUS + 1)**2 * 7 + 8 + ID_BITS
+    action_size = len(ACTIONS)
+    agent = DQNAgent(state_size, action_size)
+
+    best_path = os.path.join(MODELS_DIR, "dqn_best.pth")
+    if not os.path.exists(best_path):
+        print("ОЦЕНКА: файл models/dqn_best.pth не найден. Сначала потренируй модель.")
+        return
+
+    try:
+        chk = torch.load(best_path, map_location='cpu')
+        agent.model.load_state_dict(chk['model_state_dict'])
+        agent.update_target(hard=True)
+        print(f"ОЦЕНКА: загружена модель из {best_path} (total_reward={chk.get('total_reward','?')})")
+    except Exception as e:
+        print("[ОШИБКА] Не удалось загрузить чекпойнт для evaluate:", e)
+        return
+
+    agent.epsilon = 0.0
+    agent.eps_end = 0.0
+
+    stats = {'catchers': 0, 'runner': 0, 'draw': 0}
+    rewards = []
+    steps_list = []
+
+    for ep in range(1, num_episodes + 1):
+        game = EscapeGame(runner_type=runner_type,
+                          train_mode=False,
+                          seed=random.randint(0, 10**9),
+                          load_dqn_for_play=False)
+        game.dqn_catchers = agent
+
+        total_reward, steps = 0.0, 0
+        while not game.game_over:
+            r = game.step()
+            total_reward += r
+            steps += 1
+            if steps > 100000:
+                game.game_over = True
+                game.winner_text = "Ничья (лимит шагов в evaluate)"
+                game.result = 'draw'
+
+        rewards.append(total_reward)
+        steps_list.append(steps)
+        stats[game.result] += 1
+
+        if ep % 20 == 0 or ep == 1 or ep == num_episodes:
+            wr_c = stats['catchers'] / ep
+            wr_r = stats['runner'] / ep
+            wr_d = stats['draw'] / ep
+            avg_R = sum(rewards) / len(rewards)
+            avg_steps = sum(steps_list) / len(steps_list)
+            print(
+                f"[EVAL {ep:4d}/{num_episodes}] "
+                f"R_avg={avg_R:+7.1f} | steps_avg={avg_steps:5.1f} | "
+                f"winC={wr_c*100:5.1f}% winR={wr_r*100:5.1f}% draw={wr_d*100:5.1f}%"
+            )
+
+    print("\n=== EVAL SUMMARY ===")
+    print(f"Эпизодов: {num_episodes}")
+    print(f"Победа Catchers: {stats['catchers']} ({stats['catchers']/num_episodes*100:.1f}%)")
+    print(f"Победа Runner:   {stats['runner']} ({stats['runner']/num_episodes*100:.1f}%)")
+    print(f"Ничья:           {stats['draw']} ({stats['draw']/num_episodes*100:.1f}%)")
+    print(f"Средняя награда: {sum(rewards)/len(rewards):+.2f}")
+    print(f"Средняя длина:   {sum(steps_list)/len(steps_list):.1f} шагов")
+
+
+# ============================
+# Игра (play_loop)
+# ============================
+
 def play_loop():
     if pygame is None:
         print("Для визуализации установи pygame: pip install pygame")
         return
 
-    # выбор режима раннера
     mode = input("Runner: [1] A*  [2] Human: ").strip()
     runner_type = "human" if mode == "2" else "astar"
 
@@ -936,8 +1080,8 @@ def play_loop():
     pygame.display.set_caption("Escape RL — DQN Catchers vs Runner")
     clock = pygame.time.Clock()
 
-    # загружаем лучшую модель для блокеров
-    game = EscapeGame(runner_type=runner_type, train_mode=False, seed=random.randint(0,10**9), load_dqn_for_play=True)
+    game = EscapeGame(runner_type=runner_type, train_mode=False,
+                      seed=random.randint(0,10**9), load_dqn_for_play=True)
 
     running = True
     while running:
@@ -955,7 +1099,6 @@ def play_loop():
         clock.tick(8)
 
         if game.game_over:
-            # пауза и рестарт по Space
             font = pygame.font.SysFont(None, 28)
             msg = font.render("SPACE — новая игра; ESC — выход", True, (0,0,0))
             screen.blit(msg, (10, GRID_SIZE*CELL_SIZE + 10))
@@ -967,18 +1110,28 @@ def play_loop():
                         running = False; wait = False
                     elif event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
-                            game = EscapeGame(runner_type=runner_type, train_mode=False, seed=random.randint(0,10**9), load_dqn_for_play=True)
+                            game = EscapeGame(runner_type=runner_type, train_mode=False,
+                                              seed=random.randint(0,10**9), load_dqn_for_play=True)
                             wait = False
                         elif event.key == pygame.K_ESCAPE:
                             running = False; wait = False
 
     pygame.quit()
 
+
 # ============================
 # main
 # ============================
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1].lower() == "train":
-        train_dqn(EPISODES)
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1].lower()
+        if cmd == "train":
+            train_dqn(EPISODES)
+        elif cmd in ("eval", "evaluate"):
+            n = int(sys.argv[2]) if len(sys.argv) > 2 else 300
+            evaluate(num_episodes=n, runner_type="astar")
+        else:
+            play_loop()
     else:
         play_loop()
