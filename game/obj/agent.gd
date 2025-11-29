@@ -7,45 +7,16 @@ signal finished_turn
 
 @export var world : TileMapLayer
 @export var vision : TileMapLayer
-var active = false
-var alt_held = false
-var manual_control = false
-
+var active = false #not in use atm
 
 @export_enum("CHASER", "RUNNER") var character: String = "RUNNER"
 @export var vision_size := Vector2i(5,5)
-
-var key_dict := {
-	KEY_UP: Vector2i.UP,
-	KEY_LEFT: Vector2i.LEFT,
-	KEY_RIGHT: Vector2i.RIGHT,
-	KEY_DOWN: Vector2i.DOWN
-}
 
 func _ready() -> void:
 	#world.set_cell(world.local_to_map(position), 0, Global.tiles[character], 0)
 	vision.update_vision(world, Rect2i(world.local_to_map(position) - vision_size / 2,vision_size))
 	#print(world.local_to_map(position) - vision_size / 2)
 	#print(Global.get_state(vision, world.get_used_rect()))
-
-func _unhandled_input(event: InputEvent) -> void:
-	if !active or !manual_control: return
-	if Input.is_action_pressed("ui_cancel"):
-		finished_turn.emit(get_index())
-		return
-	if Input.is_action_pressed("alt"):
-		alt_held = true
-	else:
-		alt_held = false
-	if event is InputEventKey:
-		if event.pressed and key_dict.has(event.keycode):
-			if alt_held and character == "CHASER":
-				place(key_dict[event.keycode])
-			else:
-				go(key_dict[event.keycode])
-
-func step(input: StringName) -> void:
-	
 
 func place(direction : Vector2i):
 	var place_position_cells := world.local_to_map(global_position) + direction

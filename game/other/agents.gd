@@ -5,6 +5,16 @@ extends Node2D
 @export var c_vis : TileMapLayer
 @export var agent : PackedScene
 
+var active_agent : Node2D
+var alt_held : bool
+
+var key_dict := {
+	KEY_UP: Vector2i.UP,
+	KEY_LEFT: Vector2i.LEFT,
+	KEY_RIGHT: Vector2i.RIGHT,
+	KEY_DOWN: Vector2i.DOWN
+}
+
 signal next_turn(index: int)
 #manages turn order
 
@@ -13,16 +23,34 @@ func start():
 	for child : Agent in get_children():
 		child.finished_turn.connect(_on_child_fished_turn)
 	get_child(0).active = true
+	active_agent = get_child(0)
 
 func _on_child_fished_turn(index : int):
 	#await get_tree().process_frame
 	get_child(index).set_deferred("active",false)
 	if index == get_child_count() - 1:
+		active_agent = get_child(0)
 		next_turn.emit(0)
 		get_child(0).set_deferred("active",true)
 	else:
+		active_agent = get_child(index + 1)
 		next_turn.emit(index + 1)
 		get_child(index + 1).set_deferred("active",true)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if Input.is_action_pressed("ui_cancel"):
+		_on_child_fished_turn(active_agent.get_index())
+		return
+	if Input.is_action_pressed("alt"):
+		alt_held = true
+	else:
+		alt_held = false
+	if event is InputEventKey:
+		if event.pressed and key_dict.has(event.keycode):
+			if alt_held and active_agent.character == "CHASER":
+				active_agent.place(key_dict[event.keycode])
+			else:
+				active_agent.go(key_dict[event.keycode])
 
 func spawn_agents():
 	for coord in world.get_used_cells_by_id(0,Global.tiles.RUNNER,0):
