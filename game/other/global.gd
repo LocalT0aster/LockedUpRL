@@ -33,5 +33,5 @@ func get_state(world : TileMapLayer, rect: Rect2i) -> String:
 			var a_coords = world.get_cell_atlas_coords(Vector2i(i,j) + rect.position)
 			state += state_dict[a_coords] + " "
 		state += "\n"
-	#print(state)
+	print(state)
 	return state
