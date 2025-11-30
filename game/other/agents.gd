@@ -76,6 +76,6 @@ func spawn_agents():
 func check_chaser_win():
 	for agent : Agent in get_children():
 		if (
-				world.can_exit(agent.position) 
-			): break
+				agent.character == "RUNNER" and world.can_exit(agent.position)
+			): return
 	Global.chaser_won.emit()

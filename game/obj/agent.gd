@@ -3,8 +3,6 @@ extends Node2D
 class_name Agent
 
 signal finished_turn
-signal runner_won
-
 
 @export var world : TileMapLayer
 @export var vision : TileMapLayer
