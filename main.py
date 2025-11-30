@@ -23,12 +23,6 @@ def _build_parser():
                         help="Runner controller (overrides prompt if provided)")
 
     pipe_p = subparsers.add_parser("pipe", help="Pipe-based evaluation for Godot")
-    pipe_p.add_argument("--role", choices=["runner", "catcher"], default="catcher",
-                        help="Which agent role this process controls")
-    pipe_p.add_argument("--catcher-index", type=int, default=0,
-                        help="Index of the catcher to control (if multiple are present)")
-    pipe_p.add_argument("--allow-unknown", action="store_true",
-                        help="Allow stepping into unknown tiles in the provided vision map")
 
     return parser
 

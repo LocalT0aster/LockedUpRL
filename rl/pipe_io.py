@@ -1,0 +1,85 @@
+"""
+Lightweight pipe IO utilities.
+
+Responsible only for:
+- Reading observations sent by the Godot game (metadata line + grid rows).
+- Writing back an action string.
+- Running a loop with a user-provided decision callback.
+
+Decision logic belongs elsewhere (e.g., escape_game.py).
+"""
+
+from __future__ import annotations
+
+import sys
+from typing import Callable, Dict, Iterable, List, Tuple
+
+
+Observation = Tuple[List[str], Dict[str, str]]
+DecisionFn = Callable[[List[str], Dict[str, str]], str]
+
+
+def read_observation(stream=None) -> Observation | Tuple[None, None]:
+    """
+    Reads one observation from the pipe.
+    Format:
+      - Optional first line: key=value tokens separated by spaces (metadata)
+      - Then one or more grid rows (space-separated cell tokens)
+      - Blank line terminates the observation
+    Returns (rows, meta) or (None, None) on EOF.
+    """
+    stream = stream or sys.stdin
+    meta: Dict[str, str] = {}
+    rows: List[str] = []
+    while True:
+        line = stream.readline()
+        if line == "":
+            break  # EOF
+        stripped = line.strip()
+        if stripped == "":
+            if rows:
+                break
+            continue
+        if not rows and "=" in stripped and all("=" in part for part in stripped.split()):
+            for part in stripped.split():
+                key, _, value = part.partition("=")
+                if key:
+                    meta[key.strip().lower()] = value.strip()
+            continue
+        rows.append(stripped)
+    if not rows and not meta:
+        return None, None
+    return rows, meta
+
+
+def write_action(action: str, out=None) -> None:
+    out = out or sys.stdout
+    print(action, file=out, flush=True)
+
+
+def run_loop(decide: DecisionFn, stream=None, out=None) -> None:
+    """
+    Repeatedly reads observations and delegates to `decide(rows, meta)` for an action string.
+    """
+    stream = stream or sys.stdin
+    out = out or sys.stdout
+    while True:
+        rows, meta = read_observation(stream)
+        if rows is None:
+            break
+        action = decide(rows, meta or {})
+        if action is None:
+            action = "stay"
+        write_action(action, out)
+
+
+def normalize_grid_rows(rows: Iterable[str]) -> List[List[str]]:
+    """
+    Splits each row into tokens, strips whitespace, keeps them verbatim.
+    """
+    grid: List[List[str]] = []
+    for raw in rows:
+        toks = [tok.strip() for tok in raw.split() if tok.strip()]
+        if toks:
+            grid.append(toks)
+    return grid
