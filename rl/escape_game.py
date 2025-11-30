@@ -1212,22 +1212,22 @@ def _pipe_action_name(idx):
     dx, dy, kind = ACTIONS[idx]
     if kind == "move":
         if dx == 0 and dy == -1:
-            return "move_up"
+            return "move up"
         if dx == 1 and dy == 0:
-            return "move_right"
+            return "move right"
         if dx == 0 and dy == 1:
-            return "move_down"
+            return "move down"
         if dx == -1 and dy == 0:
-            return "move_left"
+            return "move left"
     if kind == "block":
         if dx == 0 and dy == -1:
-            return "build_up"
+            return "build up"
         if dx == 1 and dy == 0:
-            return "build_right"
+            return "build right"
         if dx == 0 and dy == 1:
-            return "build_down"
+            return "build down"
         if dx == -1 and dy == 0:
-            return "build_left"
+            return "build left"
     return "stay"
 
 
@@ -1235,13 +1235,13 @@ def _pipe_runner_decide(game):
     action_vec = game.runner_agent.get_action(game)
     dx, dy = action_vec
     if (dx, dy) == (0, -1):
-        return "move_up"
+        return "move up"
     if (dx, dy) == (1, 0):
-        return "move_right"
+        return "move right"
     if (dx, dy) == (0, 1):
-        return "move_down"
+        return "move down"
     if (dx, dy) == (-1, 0):
-        return "move_left"
+        return "move left"
     return "stay"
 
 
@@ -1253,14 +1253,33 @@ def _pipe_catcher_decide(game, idx):
 
 
 def _pipe_decider():
-    def decide(rows, meta):
-        role_raw = (meta.get("role") or "catcher0").strip().lower()
-        role = "runner" if role_raw.startswith("runner") else "catcher"
-        idx_val = 0
-        if role == "catcher" and role_raw.startswith("catcher"):
-            suffix = role_raw[len("catcher"):]
+    def _parse_role(meta_role):
+        raw = (meta_role or "").strip()
+        if not raw:
+            raw = "C1"
+        lower = raw.lower()
+        if lower.startswith("runner") or lower.startswith("r"):
+            suffix = lower[1:] if lower.startswith("r") else lower[len("runner"):]
+            idx_val = 0
             if suffix.isdigit():
-                idx_val = int(suffix)
+                idx_val = max(int(suffix) - 1, 0)
+            label = raw
+            if not label:
+                label = "R"
+            return "runner", idx_val, label
+
+        # catcher variants: "catcherX" or "cX" or fallback
+        suffix = ""
+        if lower.startswith("catcher"):
+            suffix = lower[len("catcher"):]
+        elif lower.startswith("c"):
+            suffix = lower[1:]
+        idx_val = max(int(suffix) - 1, 0) if suffix.isdigit() else 0
+        label = raw if raw else f"C{idx_val+1}"
+        return "catcher", idx_val, label
+
+    def decide(rows, meta):
+        role_type, idx_val, role_label = _parse_role(meta.get("role"))
         idx_override = meta.get("id")
         if idx_override is not None:
             try:
@@ -1272,12 +1291,14 @@ def _pipe_decider():
         if game is None:
             return "stay"
 
-        if role == "runner":
-            return _pipe_runner_decide(game)
+        if role_type == "runner":
+            act = _pipe_runner_decide(game)
+            return f"{role_label} act {act}"
         if not game.catchers:
             return "stay"
         idx_val = max(0, min(idx_val, len(game.catchers) - 1))
-        return _pipe_catcher_decide(game, idx_val)
+        act = _pipe_catcher_decide(game, idx_val)
+        return f"{role_label} act {act}"
 
     return decide
 

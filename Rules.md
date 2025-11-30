@@ -185,3 +185,19 @@ You can modify the following to create different scenarios:
 - Number of catch agents (`acN`)
 - Maximum turns (`tlN`)
 - Vision distance for each agent
+
+---
+
+## Pipe Metadata and Action Strings
+
+When using the pipe interface (e.g., with Godot), each turn can include a metadata line before the grid rows:
+
+- **Meta line (space-delimited)**: `role <R|R1|C1|C2|...> pos <x> <y>`
+  - `role` — runner (`R`/`R1`) or catcher index (`C1`, `C2`, ...; 1-based for readability).
+  - `pos` — the agent’s current coordinates as `x y`.
+  - Legacy `key=value` metadata is still accepted.
+
+- **Action line (emitted per turn)**: `<ROLE> act <verb> <dir?>`
+  - Movement: `move up|down|left|right|stay`
+  - Build (catchers): `build up|down|left|right`
+  - Examples: `C2 act move up`, `R act stay`, `C1 act build left`

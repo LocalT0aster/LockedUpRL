@@ -11,7 +11,6 @@ The game rules and agent description is located in [Rules.md](Rules.md)
 
 ### Pipe protocol
 
-`stdin` supplies the current vision map; rows are space-separated codes from `Rules.md` (`_C`, `eC`, `oC`, `aeC`, `acC`, `unkC`). A blank line separates turns. An optional first line can hold metadata, e.g. `role=runner id=1`. The script prints one action per turn to `stdout`:
-
-- Runner actions: `move_up`, `move_down`, `move_left`, `move_right`, `stay`
-- Catcher actions: `move_*`, `build_*`, `stay`
+- Input: `stdin` supplies the current vision map; rows are space-separated codes from `Rules.md` (`_C`, `eC`, `oC`, `aeC`, `acC`, `unkC`). A blank line separates turns.
+- Metadata (optional first line): space-delimited `role <token> pos <x> <y>`, e.g. `role C2 pos 3 12` or `role R pos 10 5`. Legacy `key=value` metadata is still accepted.
+- Output: one line per turn in the form `<ROLE> act <verb> <dir?>`, e.g. `C2 act move up`, `R act stay`, `C1 act build left`.

@@ -23,7 +23,9 @@ def read_observation(stream=None) -> Observation | Tuple[None, None]:
     """
     Reads one observation from the pipe.
     Format:
-      - Optional first line: key=value tokens separated by spaces (metadata)
+      - Optional first line: metadata
+          * Legacy: key=value tokens separated by spaces
+          * New: space-delimited tokens, e.g. "role C2 pos 10 5"
       - Then one or more grid rows (space-separated cell tokens)
       - Blank line terminates the observation
     Returns (rows, meta) or (None, None) on EOF.
@@ -40,12 +42,30 @@ def read_observation(stream=None) -> Observation | Tuple[None, None]:
             if rows:
                 break
             continue
-        if not rows and "=" in stripped and all("=" in part for part in stripped.split()):
-            for part in stripped.split():
-                key, _, value = part.partition("=")
-                if key:
-                    meta[key.strip().lower()] = value.strip()
-            continue
+        if not rows:
+            parts = stripped.split()
+            if "=" in stripped and all("=" in part for part in parts):
+                for part in parts:
+                    key, _, value = part.partition("=")
+                    if key:
+                        meta[key.strip().lower()] = value.strip()
+                continue
+            # New space-delimited meta format: role <token> pos <x> <y>
+            if parts and parts[0].lower() == "role":
+                role_val = parts[1] if len(parts) > 1 else ""
+                meta["role"] = role_val
+                if "pos" in (p.lower() for p in parts):
+                    try:
+                        pos_idx = [p.lower() for p in parts].index("pos")
+                        if len(parts) > pos_idx + 2:
+                            px = parts[pos_idx + 1]
+                            py = parts[pos_idx + 2]
+                            meta["pos"] = f"{px},{py}"
+                            meta["pos_x"] = px
+                            meta["pos_y"] = py
+                    except ValueError:
+                        pass
+                continue
         rows.append(stripped)
     if not rows and not meta:
         return None, None
