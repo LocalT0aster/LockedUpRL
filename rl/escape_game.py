@@ -1163,7 +1163,7 @@ def _pipe_parse_rows(rows):
     return parsed
 
 
-def _pipe_build_game_from_rows(rows):
+def _pipe_build_game_from_rows(rows, meta=None):
     grid_tokens = _pipe_parse_rows(rows)
     if not grid_tokens:
         return None
@@ -1180,7 +1180,6 @@ def _pipe_build_game_from_rows(rows):
 
     game.grid = np.ones((GRID_SIZE, GRID_SIZE), dtype=np.int8)
     game.exits = []
-    game.catchers = []
     game.runner_pos = (0, 0)
 
     for y in range(min(h, GRID_SIZE)):
@@ -1195,12 +1194,21 @@ def _pipe_build_game_from_rows(rows):
                 game.runner_pos = (x, y)
                 game.grid[y, x] = 0
             elif token == PIPE_CELL_CATCHER:
-                game.catchers.append((x, y))
                 game.grid[y, x] = 0
+                game.catchers.append((x, y))
             elif token == PIPE_CELL_UNKNOWN:
                 game.grid[y, x] = 0  # always allow moving into unknown cells
             else:
                 game.grid[y, x] = 0
+
+    if meta and meta.get("role") and meta.get("role").startswith("C") and meta.get("pos"):
+        cur_pos = (int(meta["pos_x"]), int(meta["pos_y"]))
+        catcher_id = int(meta["role"][1:])
+        try:
+            index = game.catchers.index(cur_pos)
+            game.catchers[index], game.catchers[catcher_id] = game.catchers[catcher_id], game.catchers[index]
+        except ValueError:
+            game.catchers[catcher_id] = (int(meta["pos_x"]), int(meta["pos_y"]))
 
     game.shared_map.fill(-1)
     for y in range(min(h, GRID_SIZE)):
@@ -1213,6 +1221,7 @@ def _pipe_build_game_from_rows(rows):
 
     game.last_seen_runner = None
     game._refresh_shared_map_all()
+
     return game
 
 
@@ -1324,14 +1333,8 @@ def _pipe_decider():
     def decide(rows, meta):
         role_type, idx_val, role_label = _parse_role(meta.get("role"))
         logger.info("[pipe] meta=%s role=%s idx=%d", meta or {}, role_type, idx_val)
-        idx_override = meta.get("id")
-        if idx_override is not None:
-            try:
-                idx_val = int(idx_override)
-            except ValueError:
-                pass
 
-        game = _pipe_build_game_from_rows(rows)
+        game = _pipe_build_game_from_rows(rows, meta=meta)
         if game is None:
             logger.warning("[pipe] Received empty/invalid grid; sending stay")
             return "stay"

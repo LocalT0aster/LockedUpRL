@@ -65,13 +65,7 @@ def read_observation(stream=None) -> Observation | Tuple[None, None]:
             continue
         if not rows:
             parts = stripped.split()
-            if "=" in stripped and all("=" in part for part in parts):
-                for part in parts:
-                    key, _, value = part.partition("=")
-                    if key:
-                        meta[key.strip().lower()] = value.strip()
-                continue
-            # New space-delimited meta format: role <token> pos <x> <y>
+            # space-delimited meta format: role <token> pos <x> <y>
             if parts and parts[0].lower() == "role":
                 role_val = parts[1] if len(parts) > 1 else ""
                 meta["role"] = role_val

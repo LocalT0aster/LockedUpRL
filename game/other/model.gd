@@ -80,8 +80,8 @@ func _shell_quote(text: String) -> String:
 
 
 # Send one observation to the model.
-# `rows` should be the strings you already render for the vision map (see pipe protocol).
-# An optional `meta_line` (e.g. "role C1 pos 3 12") is sent first when provided.
+# `prefix` is the optional metadata line (e.g. "role C1 pos 3 12").
+# `rows` are the grid rows.
 func send_data(prefix: String = "", rows: PackedStringArray = PackedStringArray()) -> void:
 	_ipc.send_lines(rows, prefix)
 

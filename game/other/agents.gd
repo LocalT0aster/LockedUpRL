@@ -128,6 +128,7 @@ func _request_model_action(agent: Agent) -> void:
 
 func _build_rows(type: String = "") -> PackedStringArray:
 	var rows := PackedStringArray()
+
 	var map := world
 	match type:
 		"CHASER":
