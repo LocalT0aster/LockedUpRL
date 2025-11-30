@@ -37,7 +37,10 @@ func _on_child_fished_turn(index : int):
 		next_turn.emit(index + 1)
 		get_child(index + 1).set_deferred("active",true)
 	check_chaser_win()
-	Global.get_state(world, world.get_used_rect())
+	if active_agent.character == "CHASER":
+		Global.get_state(c_vis, Rect2i(c_vis.local_to_map(active_agent.position),))
+	else:
+		Global.get_state(r_vis, Rect2i(c_vis.local_to_map(active_agent.position),))
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Input.is_action_pressed("ui_cancel"):
