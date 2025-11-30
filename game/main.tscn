@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=4 uid="uid://cvscynthmt1ld"]
+[gd_scene load_steps=11 format=4 uid="uid://cvscynthmt1ld"]
 
 [ext_resource type="Texture2D" uid="uid://b0qma8ysgxj8d" path="res://img/sprsht1.png" id="1_ig7tw"]
 [ext_resource type="Script" uid="uid://dpv4rynwlm72g" path="res://main.gd" id="1_lquwl"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://b0dxr37c4fjjl" path="res://other/agents.gd" id="2_1bvp3"]
 [ext_resource type="Script" uid="uid://kr2h0fwmp18v" path="res://world_tilemap.gd" id="3_7mycd"]
 [ext_resource type="Script" uid="uid://cnw1jhf58osu1" path="res://vision_tilemap.gd" id="4_5vw27"]
+[ext_resource type="PackedScene" uid="uid://b46csuma52m01" path="res://obj/agent.tscn" id="6_5vw27"]
 [ext_resource type="Script" uid="uid://t3fpw2g0phkj" path="res://label.gd" id="7_272bh"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0xm2m"]
@@ -54,6 +55,7 @@ script = ExtResource("2_1bvp3")
 world = NodePath("../world_tilemap")
 r_vis = NodePath("../runner_tilemap")
 c_vis = NodePath("../chaser_tilemap")
+agent_scene = ExtResource("6_5vw27")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 offset = Vector2(256, 256)

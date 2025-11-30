@@ -60,5 +60,5 @@ func is_running() -> bool:
 
 
 func _process(_delta: float) -> void:
-	for action in _ipc.poll():
+	for action : String in _ipc.poll():
 		action_received.emit(action)
