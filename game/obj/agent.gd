@@ -25,7 +25,6 @@ func place(direction : Vector2i):
 		world.update_astar()
 		vision.update_vision(world, Rect2i(world.local_to_map(position) - vision_size / 2,vision_size))
 		finished_turn.emit(get_index())
-	check_chaser_win()
 
 func go(direction : Vector2i):
 	var new_position_cells := world.local_to_map(global_position) + direction
@@ -36,19 +35,3 @@ func go(direction : Vector2i):
 		world.update_astar()
 		vision.update_vision(world, Rect2i(world.local_to_map(position) - vision_size / 2,vision_size))
 		finished_turn.emit(get_index())
-	check_runner_win(new_position_cells)
-	check_chaser_win()
-
-func check_runner_win(coords : Vector2i):
-	if (
-			world.get_cell_atlas_coords(Vector2i(coords)) == Global.tiles.EXIT
-		) and (
-			character == "RUNNER"
-		):
-			Global.runner_won.emit()
-
-func check_chaser_win():
-	if (
-			!world.can_exit(position)
-		):
-			Global.chaser_won.emit()

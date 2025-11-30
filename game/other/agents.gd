@@ -5,7 +5,7 @@ extends Node2D
 @export var c_vis : TileMapLayer
 @export var agent : PackedScene
 
-var active_agent : Node2D
+var active_agent : Agent
 var alt_held : bool
 
 var key_dict := {
@@ -66,3 +66,18 @@ func spawn_agents():
 		agent_inst.character = "CHASER"
 		agent_inst.position = Vector2(coord) * Global.TILE_SIZE + Vector2.ONE * 8
 		add_child(agent_inst)
+
+func check_runner_win(coords : Vector2i):
+	if (
+			world.get_cell_atlas_coords(Vector2i(coords)) == Global.tiles.EXIT
+		) and (
+			active_agent.character == "RUNNER"
+		):
+			Global.runner_won.emit()
+
+func check_chaser_win():
+	for agent : Agent in get_children():
+		if (
+				world.can_exit(agent.position) 
+			): break
+	Global.chaser_won.emit()
