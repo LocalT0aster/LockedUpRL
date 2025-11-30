@@ -1064,6 +1064,281 @@ def evaluate(num_episodes=300, runner_type="astar"):
 
 
 # ============================
+# Pipe evaluation (Godot integration)
+# ============================
+
+CELL_EMPTY = "_C"
+CELL_EXIT = "eC"
+CELL_OBSTACLE = "oC"
+CELL_RUNNER = "aeC"
+CELL_CATCHER = "acC"
+CELL_UNKNOWN = "unkC"
+
+_PIPE_TOKEN_MAP = {
+    "_c": CELL_EMPTY,
+    "empty": CELL_EMPTY,
+    "floor": CELL_EMPTY,
+    "ec": CELL_EXIT,
+    "exit": CELL_EXIT,
+    "oc": CELL_OBSTACLE,
+    "block": CELL_OBSTACLE,
+    "wall": CELL_OBSTACLE,
+    "ae": CELL_RUNNER,
+    "aec": CELL_RUNNER,
+    "runner": CELL_RUNNER,
+    "ac": CELL_CATCHER,
+    "acc": CELL_CATCHER,
+    "catcher": CELL_CATCHER,
+    "unk": CELL_UNKNOWN,
+    "unkc": CELL_UNKNOWN,
+    "unknown": CELL_UNKNOWN,
+}
+
+_MOVE_DIRS = [
+    (0, -1),
+    (1, 0),
+    (0, 1),
+    (-1, 0),
+]
+
+_RUNNER_ACTIONS = {
+    (0, -1): "move_up",
+    (1, 0): "move_right",
+    (0, 1): "move_down",
+    (-1, 0): "move_left",
+    (0, 0): "stay",
+}
+
+_CATCHER_MOVE_ACTIONS = {
+    (0, -1): "move_up",
+    (1, 0): "move_right",
+    (0, 1): "move_down",
+    (-1, 0): "move_left",
+    (0, 0): "stay",
+}
+
+_CATCHER_BUILD_ACTIONS = {
+    (0, -1): "build_up",
+    (1, 0): "build_right",
+    (0, 1): "build_down",
+    (-1, 0): "build_left",
+}
+
+
+def _normalize_token(tok):
+    key = tok.strip()
+    lookup = _PIPE_TOKEN_MAP.get(key.lower())
+    return lookup if lookup is not None else key
+
+
+def _parse_grid_from_lines(lines):
+    grid = []
+    for raw in lines:
+        row = [_normalize_token(tok) for tok in raw.split() if tok.strip()]
+        if row:
+            grid.append(row)
+    return grid
+
+
+def _find_positions(grid, targets):
+    tgt = set(targets)
+    found = []
+    for y, row in enumerate(grid):
+        for x, cell in enumerate(row):
+            if cell in tgt:
+                found.append((x, y))
+    return found
+
+
+def _in_bounds(grid, pos):
+    x, y = pos
+    return 0 <= y < len(grid) and 0 <= x < len(grid[y])
+
+
+def _manhattan_dist(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+
+def _bfs_first_step(grid, start, goals, passable):
+    if not goals:
+        return None
+    seen = {start: None}
+    q = deque([start])
+    while q:
+        cur = q.popleft()
+        if cur in goals:
+            while seen[cur] and seen[cur] != start:
+                cur = seen[cur]
+            dx = cur[0] - start[0]
+            dy = cur[1] - start[1]
+            return (dx, dy)
+        for dx, dy in _MOVE_DIRS:
+            nxt = (cur[0] + dx, cur[1] + dy)
+            if nxt in seen:
+                continue
+            if not _in_bounds(grid, nxt):
+                continue
+            if not passable(nxt):
+                continue
+            seen[nxt] = cur
+            q.append(nxt)
+    return None
+
+
+def _runner_pipe_action(grid, allow_unknown=False):
+    runners = _find_positions(grid, {CELL_RUNNER})
+    if not runners:
+        return "stay"
+    runner = runners[0]
+    exits = _find_positions(grid, {CELL_EXIT})
+    catchers = _find_positions(grid, {CELL_CATCHER})
+
+    def passable(pos):
+        cell = grid[pos[1]][pos[0]]
+        if cell in (CELL_OBSTACLE, CELL_CATCHER):
+            return False
+        if cell == CELL_UNKNOWN and not allow_unknown:
+            return False
+        return True
+
+    step = _bfs_first_step(grid, runner, set(exits), passable)
+    if step is not None:
+        return _RUNNER_ACTIONS.get(step, "stay")
+
+    best_score = -1e18
+    best_action = "stay"
+    for dx, dy in _MOVE_DIRS + [(0, 0)]:
+        nxt = (runner[0] + dx, runner[1] + dy)
+        if not _in_bounds(grid, nxt):
+            continue
+        cell = grid[nxt[1]][nxt[0]]
+        if cell in (CELL_OBSTACLE, CELL_CATCHER):
+            continue
+        if cell == CELL_UNKNOWN and not allow_unknown:
+            continue
+        dist_to_catcher = min((_manhattan_dist(nxt, c) for c in catchers), default=10)
+        dist_to_exit = min((_manhattan_dist(nxt, e) for e in exits), default=0)
+        score = dist_to_catcher * 2.0 - dist_to_exit
+        if score > best_score:
+            best_score = score
+            best_action = _RUNNER_ACTIONS[(dx, dy)]
+    return best_action
+
+
+def _catcher_pipe_action(grid, catcher_index=0, allow_unknown=False):
+    catchers = _find_positions(grid, {CELL_CATCHER})
+    if not catchers:
+        return "stay"
+    idx = min(max(catcher_index, 0), len(catchers) - 1)
+    catcher = catchers[idx]
+    runner_positions = _find_positions(grid, {CELL_RUNNER})
+    exits = _find_positions(grid, {CELL_EXIT})
+
+    def passable(pos):
+        cell = grid[pos[1]][pos[0]]
+        if cell == CELL_OBSTACLE:
+            return False
+        if cell == CELL_UNKNOWN and not allow_unknown:
+            return False
+        if cell == CELL_CATCHER and pos != catcher:
+            return False
+        return True
+
+    goals = runner_positions or exits
+    step = _bfs_first_step(grid, catcher, set(goals), passable)
+    if step is not None:
+        return _CATCHER_MOVE_ACTIONS.get(step, "stay")
+
+    if runner_positions:
+        target = runner_positions[0]
+        prioritized_dirs = sorted(
+            _MOVE_DIRS,
+            key=lambda d: _manhattan_dist((catcher[0] + d[0], catcher[1] + d[1]), target)
+        )
+        for dx, dy in prioritized_dirs:
+            tx, ty = catcher[0] + dx, catcher[1] + dy
+            if not _in_bounds(grid, (tx, ty)):
+                continue
+            cell = grid[ty][tx]
+            if cell in (CELL_EMPTY, CELL_EXIT):
+                return _CATCHER_BUILD_ACTIONS.get((dx, dy), "stay")
+
+    if exits:
+        step = _bfs_first_step(grid, catcher, set(exits), passable)
+        if step is not None:
+            return _CATCHER_MOVE_ACTIONS.get(step, "stay")
+
+    for dx, dy in _MOVE_DIRS:
+        nxt = (catcher[0] + dx, catcher[1] + dy)
+        if _in_bounds(grid, nxt) and passable(nxt):
+            return _CATCHER_MOVE_ACTIONS.get((dx, dy), "stay")
+    return "stay"
+
+
+def _read_pipe_observation(stream):
+    """
+    Reads a single observation from the stream.
+    Format: optional metadata line (key=value ...), followed by grid rows.
+    A blank line separates observations.
+    """
+    meta = {}
+    rows = []
+    while True:
+        line = stream.readline()
+        if line == "":
+            break  # EOF
+        stripped = line.strip()
+        if stripped == "":
+            if rows:
+                break
+            continue
+        if not rows and "=" in stripped and all("=" in part for part in stripped.split()):
+            for part in stripped.split():
+                key, _, value = part.partition("=")
+                if key:
+                    meta[key.strip().lower()] = value.strip()
+            continue
+        rows.append(stripped)
+    if not rows and not meta:
+        return None, None
+    return rows, meta
+
+
+def run_pipe_agent(role="catcher", catcher_index=0, allow_unknown=False, stream=None, out=None):
+    """
+    Runs an interactive loop:
+    - Reads a vision map from stdin (lines of tokens, blank line separates turns).
+    - Outputs a single action per turn to stdout.
+    Meta line example: "role=runner id=0".
+    """
+    stream = stream or sys.stdin
+    out = out or sys.stdout
+    while True:
+        rows, meta = _read_pipe_observation(stream)
+        if rows is None:
+            break
+        grid = _parse_grid_from_lines(rows)
+        if not grid:
+            print("stay", file=out, flush=True)
+            continue
+        meta = meta or {}
+        chosen_role = meta.get("role", role).lower()
+        idx_override = meta.get("id")
+        idx_val = catcher_index
+        if idx_override is not None:
+            try:
+                idx_val = int(idx_override)
+            except ValueError:
+                idx_val = catcher_index
+
+        if chosen_role == "runner":
+            action = _runner_pipe_action(grid, allow_unknown=allow_unknown)
+        else:
+            action = _catcher_pipe_action(grid, catcher_index=idx_val, allow_unknown=allow_unknown)
+        print(action, file=out, flush=True)
+
+
+# ============================
 # Игра (play_loop)
 # ============================
 
@@ -1119,19 +1394,9 @@ def play_loop():
     pygame.quit()
 
 
-# ============================
-# main
-# ============================
+def main():
+    raise RuntimeError("Command-line handling was moved to main.py. Use `python main.py <command>`.")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        cmd = sys.argv[1].lower()
-        if cmd == "train":
-            train_dqn(EPISODES)
-        elif cmd in ("eval", "evaluate"):
-            n = int(sys.argv[2]) if len(sys.argv) > 2 else 300
-            evaluate(num_episodes=n, runner_type="astar")
-        else:
-            play_loop()
-    else:
-        play_loop()
+    # Fallback for direct execution: default to play loop without parsing argv.
+    play_loop()
