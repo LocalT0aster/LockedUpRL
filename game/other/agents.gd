@@ -45,9 +45,9 @@ func _on_child_fished_turn(index : int):
 		get_child(index + 1).set_deferred("active",true)
 	check_chaser_win()
 	if active_agent.character == "CHASER":
-		Global.get_state(c_vis, Rect2i(c_vis.local_to_map(active_agent.position),))
+		Global.get_state(c_vis, c_vis.get_used_rect())
 	else:
-		Global.get_state(r_vis, Rect2i(c_vis.local_to_map(active_agent.position),))
+		Global.get_state(r_vis, r_vis.get_used_rect())
 	if use_model:
 		_request_model_action(active_agent)
 

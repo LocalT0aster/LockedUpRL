@@ -4,7 +4,8 @@ extends Node
 signal chaser_won
 @warning_ignore("unused_signal")
 signal runner_won
-
+const VISION_SIZE := Vector2i(5,5)
+const AREA_SIZE = 32
 const TILE_SIZE = 16.0
 var tiles := {
 	"UNKNOWN": Vector2i(0,2),
