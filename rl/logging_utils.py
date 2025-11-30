@@ -4,8 +4,8 @@ import sys
 from typing import Optional
 
 # Default log destination can be overridden via environment variable.
-DEFAULT_LOG_FILE = os.environ.get("ESCAPE_GAME_LOG_FILE", "escape_game.log")
-DEFAULT_LOG_LEVEL = os.environ.get("ESCAPE_GAME_LOG_LEVEL", "INFO")
+DEFAULT_LOG_FILE = "escape_game.log"
+DEFAULT_LOG_LEVEL = "INFO"
 
 
 def _resolve_level(level: Optional[int] = None) -> int:
@@ -27,7 +27,7 @@ def _has_file_handler(logger: logging.Logger, path: str) -> bool:
 
 
 def setup_logging(
-    log_file: Optional[str] = None,
+    log_file: str = "escape_game.log",
     level: Optional[int] = None,
     *,
     include_console: bool = True,

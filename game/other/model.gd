@@ -12,8 +12,9 @@ signal process_exited()                # Fired when the child process stops.
 
 var _ipc: PipeIPC = PipeIPC.new()
 
-@export var python_path: String = "python"
-@export_global_file("*.py") var script_path: String
+@export var conda_env_name: String = "lockeduprl"
+@export var conda_executable: String = "/opt/miniconda3/condabin/conda"
+@export_global_file("*.py") var script_path: String = "../main.py"
 @export var extra_args: PackedStringArray = []
 
 
@@ -24,22 +25,44 @@ func _ready() -> void:
 
 # Start the external model. Command-line arguments are built here.
 func start() -> void:
-	var py := python_path
-	var script_abs := ProjectSettings.globalize_path(script_path)
-	var args: PackedStringArray = [
-		script_abs,
-		"pipe"
-	]
-	args.append_array(extra_args)
+	var project_root := ProjectSettings.globalize_path("res://")
+	var script_abs := _to_abs_path(script_path, project_root)
 
-	var ok = _ipc.open(py, args)
+	var conda := conda_executable
+	if conda.begins_with("res://"):
+		conda = ProjectSettings.globalize_path(conda)
+	var cmdline := "cd %s && exec %s run -n %s --no-capture-output python %s pipe" % [
+		_shell_quote(project_root),
+		_shell_quote(conda),
+		_shell_quote(conda_env_name),
+		_shell_quote(script_abs)
+	]
+	if extra_args.size() > 0:
+		for a in extra_args:
+			cmdline += " " + _shell_quote(a)
+
+	var ok = _ipc.open("/bin/bash", ["-c", cmdline])
 	if not ok:
 		push_warning("Failed to start model process: execute_with_pipe returned an unexpected result.")
 
 
+func _to_abs_path(path: String, project_root: String) -> String:
+	if path.begins_with("res://"):
+		return ProjectSettings.globalize_path(path)
+	if path.begins_with("/"):
+		return path
+	return project_root.path_join(path)
+
+
+func _shell_quote(text: String) -> String:
+	# Minimal shell quoting to preserve spaces; not handling every edge case.
+	var escaped := text.replace("'", "'\"'\"'")
+	return "'" + escaped + "'"
+
+
 # Send one observation to the model.
 # `rows` should be the strings you already render for the vision map (see pipe protocol).
-# An optional `meta_line` (e.g. "role=runner id=0") is sent first when provided.
+# An optional `meta_line` (e.g. "role C1 pos 3 12") is sent first when provided.
 func send_data(prefix: String = "", rows: PackedStringArray = PackedStringArray()) -> void:
 	_ipc.send_lines(rows, prefix)
 

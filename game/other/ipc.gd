@@ -20,6 +20,7 @@ var _mutex := Mutex.new()
 func open(command: String, args: PackedStringArray = PackedStringArray()) -> bool:
 	close()
 	var result = OS.execute_with_pipe(command, args, false)
+
 	if typeof(result) != TYPE_DICTIONARY or not result.has("stdio"):
 		return false
 
@@ -71,7 +72,7 @@ func _reader_loop() -> void:
 	while _running:
 		var had_data := false
 
-		if _process_io and _process_io.get_available_bytes() > 0:
+		if _process_io and not _process_io.eof_reached():
 			var line := _process_io.get_line().strip_edges()
 			if line != "":
 				_mutex.lock()
@@ -79,7 +80,7 @@ func _reader_loop() -> void:
 				_mutex.unlock()
 			had_data = true
 
-		if _stderr_io and _stderr_io.get_available_bytes() > 0:
+		if _stderr_io and not _stderr_io.eof_reached():
 			var err_line := _stderr_io.get_line().strip_edges()
 			if err_line != "":
 				call_deferred("_emit_stderr", err_line)

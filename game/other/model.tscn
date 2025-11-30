@@ -4,4 +4,3 @@
 
 [node name="model" type="Node"]
 script = ExtResource("1_f5td4")
-script_path = "D:/filesbecausefuck/a projects 2nd gen/LockedUpRL/main.py"

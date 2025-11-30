@@ -11,8 +11,20 @@ Decision logic belongs elsewhere (e.g., escape_game.py).
 
 from __future__ import annotations
 
+import logging
 import sys
 from typing import Callable, Dict, Iterable, List, Tuple
+
+try:
+    from rl.logging_utils import setup_logging  # type: ignore
+except Exception:  # pragma: no cover - fallback if import fails
+    setup_logging = None
+
+# Ensure logging is configured even if escape_game didn't set it up yet.
+if not logging.getLogger().handlers and setup_logging is not None:
+    setup_logging()
+
+logger = logging.getLogger(__name__)
 
 
 Observation = Tuple[List[str], Dict[str, str]]
@@ -86,10 +98,18 @@ def run_loop(decide: DecisionFn, stream=None, out=None) -> None:
     while True:
         rows, meta = read_observation(stream)
         if rows is None:
+            logger.info("[pipe] EOF received; stopping loop")
             break
-        action = decide(rows, meta or {})
+        logger.info("[pipe] recv meta=%s rows=%d", meta or {}, len(rows))
+        logger.info("[pipe] grid:\n%s", "\n".join(rows))
+        try:
+            action = decide(rows, meta or {})
+        except Exception:
+            logger.exception("[pipe] decide() raised; exiting pipe loop")
+            break
         if action is None:
             action = "stay"
+        logger.info("[pipe] action=%s meta=%s rows=%d", action, meta or {}, len(rows))
         write_action(action, out)
 
 

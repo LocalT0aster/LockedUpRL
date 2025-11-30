@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from rl import pipe_io
-from rl.logging_utils import setup_logging
+from rl.logging_utils import setup_logging, DEFAULT_LOG_FILE
 
 # Configure logging once for the whole module.
 setup_logging()
@@ -1236,6 +1236,14 @@ def _pipe_action_name(idx):
 def _pipe_runner_decide(game):
     action_vec = game.runner_agent.get_action(game)
     dx, dy = action_vec
+    # Validate against available moves; fall back to a safe move or stay.
+    valid_moves = set(game._get_valid_runner_moves(game.runner_pos))
+    if (dx, dy) not in valid_moves:
+        if valid_moves:
+            dx, dy = next(iter(valid_moves))
+        else:
+            dx, dy = (0, 0)
+
     if (dx, dy) == (0, -1):
         return "move up"
     if (dx, dy) == (1, 0):
@@ -1251,7 +1259,16 @@ def _pipe_catcher_decide(game, idx):
     state = game._state_for_catcher(idx)
     mask = game._action_mask_for_catcher(idx)
     action_idx = game.dqn_catchers.act(state, valid_mask=mask, eval_mode=True)
-    return _pipe_action_name(action_idx)
+    # If the chosen action is invalid, fall back to a valid one or stay.
+    if not mask[action_idx]:
+        valid_indices = [i for i, m in enumerate(mask) if m]
+        if valid_indices:
+            action_idx = valid_indices[0]
+        else:
+            action_idx = len(ACTIONS) - 1  # stay
+    act_name = _pipe_action_name(action_idx)
+    logger.info("[pipe] catcher=%d action=%s mask=%s", idx, act_name, mask.tolist())
+    return act_name
 
 
 def _pipe_decider():
@@ -1282,6 +1299,7 @@ def _pipe_decider():
 
     def decide(rows, meta):
         role_type, idx_val, role_label = _parse_role(meta.get("role"))
+        logger.info("[pipe] meta=%s role=%s idx=%d", meta or {}, role_type, idx_val)
         idx_override = meta.get("id")
         if idx_override is not None:
             try:
@@ -1291,6 +1309,7 @@ def _pipe_decider():
 
         game = _pipe_build_game_from_rows(rows)
         if game is None:
+            logger.warning("[pipe] Received empty/invalid grid; sending stay")
             return "stay"
 
         if role_type == "runner":
@@ -1312,6 +1331,9 @@ def run_pipe_agent(stream=None, out=None):
     - We reconstruct an EscapeGame snapshot and use AStarRunner/DQNAgent for decisions.
     - Role (and catcher index) are read from the metadata role string, with optional id override.
     """
+    log_path = os.path.abspath(DEFAULT_LOG_FILE)
+    setup_logging(log_path)
+    logger.info("[pipe] run_pipe_agent started; log=%s", log_path)
     pipe_io.run_loop(
         _pipe_decider(),
         stream=stream,
