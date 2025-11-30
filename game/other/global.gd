@@ -29,7 +29,6 @@ var state_dict := {
 func get_state(world : TileMapLayer, rect: Rect2i) -> String:
 	var state: String = ""
 	for i in rect.size.x:
-		#state.append([]) 
 		for j in rect.size.y:
 			var a_coords = world.get_cell_atlas_coords(Vector2i(i,j) + rect.position)
 			state += state_dict[a_coords] + " "

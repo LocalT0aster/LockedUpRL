@@ -1,6 +1,5 @@
-[gd_scene load_steps=11 format=4 uid="uid://cvscynthmt1ld"]
+[gd_scene load_steps=10 format=4 uid="uid://cvscynthmt1ld"]
 
-[ext_resource type="PackedScene" uid="uid://b46csuma52m01" path="res://obj/agent.tscn" id="1_h2yge"]
 [ext_resource type="Texture2D" uid="uid://b0qma8ysgxj8d" path="res://img/sprsht1.png" id="1_ig7tw"]
 [ext_resource type="Script" uid="uid://dpv4rynwlm72g" path="res://main.gd" id="1_lquwl"]
 [ext_resource type="Script" uid="uid://doemua446gd8f" path="res://other/camera_2d.gd" id="2_0xm2m"]
@@ -55,7 +54,6 @@ script = ExtResource("2_1bvp3")
 world = NodePath("../world_tilemap")
 r_vis = NodePath("../runner_tilemap")
 c_vis = NodePath("../chaser_tilemap")
-agent = ExtResource("1_h2yge")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 offset = Vector2(256, 256)

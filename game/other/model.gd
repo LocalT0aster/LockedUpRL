@@ -1,10 +1,11 @@
 extends Node
 
-const PipeIPC = preload("res://other/ipc.gd")
+#const PipeIPC = preload("res://other/ipc.gd")
 
 # Autoload that owns the external model process (Python RL agent) by delegating
 # the pipe/thread work to PipeIPC.
 
+#Input format - Vector2i, String 
 signal action_received(action: String) # Fired when the model prints a line to stdout.
 signal stderr_line(line: String)       # Fired for stderr lines (useful for debugging).
 signal process_exited()                # Fired when the child process stops.
