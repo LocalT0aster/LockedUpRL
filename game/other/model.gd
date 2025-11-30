@@ -13,7 +13,7 @@ signal process_exited()                # Fired when the child process stops.
 var _ipc: PipeIPC = PipeIPC.new()
 
 @export var conda_env_name: String = "lockeduprl"
-@export var conda_executable: String = "/opt/miniconda3/condabin/conda"
+@export var conda_executable: String = "conda"
 @export_global_file("*.py") var script_path: String = "../main.py"
 @export var extra_args: PackedStringArray = []
 
@@ -31,6 +31,25 @@ func start() -> void:
 	var conda := conda_executable
 	if conda.begins_with("res://"):
 		conda = ProjectSettings.globalize_path(conda)
+
+	var is_windows := OS.get_name().to_lower().find("windows") != -1
+	if is_windows:
+		# cmd /C "cd /d <root> && conda run -n <env> --no-capture-output python <script> pipe ..."
+		var cmdline := 'cd /d "%s" && "%s" run -n "%s" --no-capture-output python "%s" pipe' % [
+			project_root,
+			conda,
+			conda_env_name,
+			script_abs,
+		]
+		if extra_args.size() > 0:
+			for a in extra_args:
+				cmdline += ' "%s"' % a
+		var ok = _ipc.open("cmd.exe", ["/C", cmdline])
+		if not ok:
+			push_warning("Failed to start model process: execute_with_pipe returned an unexpected result.")
+		return
+
+	# POSIX shells (Linux/macOS)
 	var cmdline := "cd %s && exec %s run -n %s --no-capture-output python %s pipe" % [
 		_shell_quote(project_root),
 		_shell_quote(conda),
@@ -41,7 +60,7 @@ func start() -> void:
 		for a in extra_args:
 			cmdline += " " + _shell_quote(a)
 
-	var ok = _ipc.open("/bin/bash", ["-c", cmdline])
+	var ok = _ipc.open("/bin/sh", ["-c", cmdline])
 	if not ok:
 		push_warning("Failed to start model process: execute_with_pipe returned an unexpected result.")
 
