@@ -13,10 +13,7 @@ signal process_exited()                # Fired when the child process stops.
 var _ipc: PipeIPC = PipeIPC.new()
 
 @export var python_path: String = "python"
-@export_file("*.py") var script_path: String = "res://../main.py"
-@export_enum("catcher", "runner") var role: String = "catcher"
-@export var catcher_index: int = 0
-@export var allow_unknown: bool = false
+@export_global_file("*.py") var script_path: String
 @export var extra_args: PackedStringArray = []
 
 
@@ -31,12 +28,8 @@ func start() -> void:
 	var script_abs := ProjectSettings.globalize_path(script_path)
 	var args: PackedStringArray = [
 		script_abs,
-		"pipe",
-		"--role", role,
-		"--catcher-index", str(catcher_index)
+		"pipe"
 	]
-	if allow_unknown:
-		args.append("--allow-unknown")
 	args.append_array(extra_args)
 
 	var ok = _ipc.open(py, args)
