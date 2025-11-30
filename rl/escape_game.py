@@ -18,6 +18,8 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 # Visualization for "play" mode
+# Hide pygame support prompt to avoid polluting stdout in pipe mode.
+os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 try:
     import pygame
 except Exception:
