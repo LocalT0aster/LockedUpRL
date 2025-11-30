@@ -1,7 +1,12 @@
+import logging
 import re
 import matplotlib.pyplot as plt
 
-LOG_FILE = "log.txt"
+from rl.logging_utils import DEFAULT_LOG_FILE, setup_logging
+
+LOG_FILE = DEFAULT_LOG_FILE
+logger = logging.getLogger(__name__)
+setup_logging()
 
 def parse_training(text: str):
     """
@@ -82,11 +87,11 @@ def main():
 
     # --- TRAINING ---
     tr_eps, tr_R, tr_avg100, tr_steps = parse_training(text)
-    print(f"Parsed training points: {len(tr_eps)}")
+    logger.info("Parsed training points: %d", len(tr_eps))
 
     # --- EVAL ---
     ev_eps, ev_Ravg, ev_steps_avg, ev_winC, ev_winR, ev_draw = parse_eval(text)
-    print(f"Parsed eval points: {len(ev_eps)}")
+    logger.info("Parsed eval points: %d", len(ev_eps))
 
     # ---------- Графики обучения ----------
     # 1) Reward и avg100

@@ -37,11 +37,7 @@ def main(argv=None):
     elif cmd in ("eval", "evaluate"):
         escape_game.evaluate(num_episodes=args.num_episodes, runner_type=args.runner_type)
     elif cmd == "pipe":
-        escape_game.run_pipe_agent(
-            role=args.role,
-            catcher_index=args.catcher_index,
-            allow_unknown=args.allow_unknown,
-        )
+        escape_game.run_pipe_agent()
     else:
         # play
         if getattr(args, "runner", None) is not None:

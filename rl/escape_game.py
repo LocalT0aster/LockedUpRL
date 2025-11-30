@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import random
@@ -10,6 +11,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from rl import pipe_io
+from rl.logging_utils import setup_logging
+
+# Configure logging once for the whole module.
+setup_logging()
+logger = logging.getLogger(__name__)
 
 # Visualization for "play" mode
 try:
@@ -367,13 +373,15 @@ class EscapeGame:
                         chk = torch.load(best_path, map_location='cpu')
                         self.dqn_catchers.model.load_state_dict(chk['model_state_dict'])
                         self.dqn_catchers.update_target(hard=True)
-                        print("Uploaded by dqn_best.pth")
+                        logger.info("Loaded dqn_best.pth")
                     except RuntimeError as e:
-                        print("[WARN] Failed to load dqn_best.pth (most likely, a different architecture).")
-                        print("       Message PyTorch:", e)
-                        print("       Continue with the untrained model.")
+                        logger.warning(
+                            "Failed to load dqn_best.pth (most likely, a different architecture). "
+                            "PyTorch message: %s. Continue with the untrained model.",
+                            e,
+                        )
                 else:
-                    print("models/dqn_best.pth not found — playing without a trained model")
+                    logger.warning("models/dqn_best.pth not found — playing without a trained model")
 
         self.blocked_exits = set()
 
@@ -931,15 +939,15 @@ def train_dqn(episodes=EPISODES):
                 agent.optimizer.load_state_dict(chk['optimizer_state_dict'])
             agent.step_count = chk.get('step_count', 0)
             agent.update_target(hard=True)
-            print(f"Resumed from {resume_path} (epsilon in ckpt: {chk.get('epsilon','n/a')})")
+            logger.info("Resumed from %s (epsilon in ckpt: %s)", resume_path, chk.get('epsilon', 'n/a'))
         except Exception as e:
-            print(f"[WARN] Could not resume from {resume_path}: {e}. Starting from scratch.")
+            logger.warning("Could not resume from %s: %s. Starting from scratch.", resume_path, e)
 
     best_total = -1e18
     results = {'catchers': 0, 'runner': 0, 'draw': 0}
     moving_avg = deque(maxlen=100)
 
-    print(f"TRAINING: {episodes} episodes; device: {agent.device}, eps-> {agent.eps_end}")
+    logger.info("TRAINING: %s episodes; device: %s, eps-> %s", episodes, agent.device, agent.eps_end)
 
     for ep in range(1, episodes + 1):
         game = EscapeGame(runner_type="astar", train_mode=True,
@@ -974,13 +982,25 @@ def train_dqn(episodes=EPISODES):
 
         if ep % 50 == 0 or ep == 1:
             avg100 = sum(moving_avg)/len(moving_avg)
-            print(f"[{ep:5d}/{episodes}] R={total_reward:+8.1f} avg100={avg100:+8.1f} "
-                  f"steps={steps:4d} -> {game.winner_text}")
+            logger.info(
+                "[%5d/%d] R=%+8.1f avg100=%+8.1f steps=%4d -> %s",
+                ep,
+                episodes,
+                total_reward,
+                avg100,
+                steps,
+                game.winner_text,
+            )
 
-    print("\nTRAINING COMPLETED!")
-    print(f"Catchers wins: {results['catchers']} | Runner wins: {results['runner']} | Draw: {results['draw']}")
-    print(f"The best total reward: {best_total:+.1f}")
-    print("The best model is saved in models/dqn_best.pth")
+    logger.info("TRAINING COMPLETED!")
+    logger.info(
+        "Catchers wins: %d | Runner wins: %d | Draw: %d",
+        results['catchers'],
+        results['runner'],
+        results['draw'],
+    )
+    logger.info("The best total reward: %+0.1f", best_total)
+    logger.info("The best model is saved in models/dqn_best.pth")
 
 
 # ============================
@@ -1000,16 +1020,16 @@ def evaluate(num_episodes=300, runner_type="astar"):
 
     best_path = os.path.join(MODELS_DIR, "dqn_best.pth")
     if not os.path.exists(best_path):
-        print("EVALUATION: The models/dqn_best.pth file was not found. Train the model first.")
+        logger.warning("EVALUATION: The models/dqn_best.pth file was not found. Train the model first.")
         return
 
     try:
         chk = torch.load(best_path, map_location='cpu')
         agent.model.load_state_dict(chk['model_state_dict'])
         agent.update_target(hard=True)
-        print(f"EVALUATION: uploaded a model from {best_path} (total_reward={chk.get('total_reward','?')})")
+        logger.info("EVALUATION: uploaded a model from %s (total_reward=%s)", best_path, chk.get('total_reward','?'))
     except Exception as e:
-        print("[ERROR] Couldn't load the checkpoint for evaluate:", e)
+        logger.exception("Couldn't load the checkpoint for evaluate from %s", best_path)
         return
 
     agent.epsilon = 0.0
@@ -1046,19 +1066,24 @@ def evaluate(num_episodes=300, runner_type="astar"):
             wr_d = stats['draw'] / ep
             avg_R = sum(rewards) / len(rewards)
             avg_steps = sum(steps_list) / len(steps_list)
-            print(
-                f"[EVAL {ep:4d}/{num_episodes}] "
-                f"R_avg={avg_R:+7.1f} | steps_avg={avg_steps:5.1f} | "
-                f"winC={wr_c*100:5.1f}% winR={wr_r*100:5.1f}% draw={wr_d*100:5.1f}%"
+            logger.info(
+                "[EVAL %4d/%d] R_avg=%+7.1f | steps_avg=%5.1f | winC=%5.1f%% winR=%5.1f%% draw=%5.1f%%",
+                ep,
+                num_episodes,
+                avg_R,
+                avg_steps,
+                wr_c*100,
+                wr_r*100,
+                wr_d*100,
             )
 
-    print("\n=== EVAL SUMMARY ===")
-    print(f"Episodes: {num_episodes}")
-    print(f"Catchers wins: {stats['catchers']} ({stats['catchers']/num_episodes*100:.1f}%)")
-    print(f"Runner wins:   {stats['runner']} ({stats['runner']/num_episodes*100:.1f}%)")
-    print(f"Draw:           {stats['draw']} ({stats['draw']/num_episodes*100:.1f}%)")
-    print(f"Average reward: {sum(rewards)/len(rewards):+.2f}")
-    print(f"Average length:   {sum(steps_list)/len(steps_list):.1f} steps")
+    logger.info("=== EVAL SUMMARY ===")
+    logger.info("Episodes: %d", num_episodes)
+    logger.info("Catchers wins: %d (%.1f%%)", stats['catchers'], stats['catchers']/num_episodes*100)
+    logger.info("Runner wins:   %d (%.1f%%)", stats['runner'], stats['runner']/num_episodes*100)
+    logger.info("Draw:          %d (%.1f%%)", stats['draw'], stats['draw']/num_episodes*100)
+    logger.info("Average reward: %+0.2f", sum(rewards)/len(rewards))
+    logger.info("Average length: %0.1f steps", sum(steps_list)/len(steps_list))
 
 # ============================
 # Pipe IO integration (Godot)
@@ -1107,9 +1132,9 @@ def _pipe_get_dqn_agent():
             chk = torch.load(best_path, map_location="cpu")
             agent.model.load_state_dict(chk["model_state_dict"])
             agent.update_target(hard=True)
-            print(f"[pipe] Loaded {best_path}")
+            logger.info("[pipe] Loaded %s", best_path)
         except Exception as e:
-            print(f"[pipe] Failed to load {best_path}: {e}")
+            logger.warning("[pipe] Failed to load %s: %s", best_path, e)
     agent.epsilon = 0.0
     agent.eps_end = 0.0
     _PIPE_DQN_AGENT = agent
@@ -1252,14 +1277,14 @@ def _pipe_decider(default_role, catcher_index, allow_unknown):
     return decide
 
 
-def run_pipe_agent(role="catcher", catcher_index=0, allow_unknown=False, stream=None, out=None):
+def run_pipe_agent(stream=None, out=None):
     """
     Pipe loop used by the Godot integration.
     - Godot sends a metadata line (role, id) and the vision grid rows.
     - We reconstruct an EscapeGame snapshot and use AStarRunner/DQNAgent for decisions.
     """
     pipe_io.run_loop(
-        _pipe_decider(role, catcher_index=catcher_index, allow_unknown=allow_unknown),
+        _pipe_decider(),
         stream=stream,
         out=out,
     )
@@ -1296,178 +1321,6 @@ _PIPE_TOKEN_MAP = {
 }
 
 _PIPE_DQN_AGENT = None
-
-
-def _pipe_get_dqn_agent():
-    global _PIPE_DQN_AGENT
-    if _PIPE_DQN_AGENT is not None:
-        return _PIPE_DQN_AGENT
-    state_size = (2 * LOCAL_RADIUS + 1) ** 2 * 7 + 8 + ID_BITS
-    action_size = len(ACTIONS)
-    agent = DQNAgent(state_size, action_size)
-    best_path = os.path.join(MODELS_DIR, "dqn_best.pth")
-    if os.path.exists(best_path):
-        try:
-            chk = torch.load(best_path, map_location="cpu")
-            agent.model.load_state_dict(chk["model_state_dict"])
-            agent.update_target(hard=True)
-            print(f"[pipe] Loaded {best_path}")
-        except Exception as e:
-            print(f"[pipe] Failed to load {best_path}: {e}")
-    agent.epsilon = 0.0
-    agent.eps_end = 0.0
-    _PIPE_DQN_AGENT = agent
-    return agent
-
-
-def _pipe_normalize_token(tok):
-    key = tok.strip()
-    return _PIPE_TOKEN_MAP.get(key.lower(), key)
-
-
-def _pipe_parse_rows(rows):
-    parsed = []
-    for raw in rows:
-        toks = [_pipe_normalize_token(t) for t in raw.split() if t.strip()]
-        if toks:
-            parsed.append(toks)
-    return parsed
-
-
-def _pipe_build_game_from_rows(rows, allow_unknown=False):
-    grid_tokens = _pipe_parse_rows(rows)
-    if not grid_tokens:
-        return None
-    h = len(grid_tokens)
-    w = len(grid_tokens[0])
-
-    game = EscapeGame(
-        runner_type="astar",
-        train_mode=False,
-        seed=0,
-        load_dqn_for_play=False,
-    )
-    game.dqn_catchers = _pipe_get_dqn_agent()
-
-    game.grid = np.ones((GRID_SIZE, GRID_SIZE), dtype=np.int8)
-    game.exits = []
-    game.catchers = []
-    game.runner_pos = (0, 0)
-
-    for y in range(min(h, GRID_SIZE)):
-        for x in range(min(w, GRID_SIZE)):
-            token = grid_tokens[y][x]
-            if token == PIPE_CELL_EXIT:
-                game.exits.append((x, y))
-                game.grid[y, x] = 0
-            elif token == PIPE_CELL_OBSTACLE:
-                game.grid[y, x] = 1
-            elif token == PIPE_CELL_RUNNER:
-                game.runner_pos = (x, y)
-                game.grid[y, x] = 0
-            elif token == PIPE_CELL_CATCHER:
-                game.catchers.append((x, y))
-                game.grid[y, x] = 0
-            elif token == PIPE_CELL_UNKNOWN:
-                game.grid[y, x] = 1 if not allow_unknown else 0
-            else:
-                game.grid[y, x] = 0
-
-    game.shared_map.fill(-1)
-    for y in range(min(h, GRID_SIZE)):
-        for x in range(min(w, GRID_SIZE)):
-            token = grid_tokens[y][x]
-            if token == PIPE_CELL_UNKNOWN:
-                game.shared_map[y, x] = -1
-            else:
-                game.shared_map[y, x] = game._cell_base_type(x, y)
-
-    game.last_seen_runner = None
-    game._refresh_shared_map_all()
-    return game
-
-
-def _pipe_action_name(idx):
-    dx, dy, kind = ACTIONS[idx]
-    if kind == "move":
-        if dx == 0 and dy == -1:
-            return "move_up"
-        if dx == 1 and dy == 0:
-            return "move_right"
-        if dx == 0 and dy == 1:
-            return "move_down"
-        if dx == -1 and dy == 0:
-            return "move_left"
-    if kind == "block":
-        if dx == 0 and dy == -1:
-            return "build_up"
-        if dx == 1 and dy == 0:
-            return "build_right"
-        if dx == 0 and dy == 1:
-            return "build_down"
-        if dx == -1 and dy == 0:
-            return "build_left"
-    return "stay"
-
-
-def _pipe_runner_decide(game):
-    action_vec = game.runner_agent.get_action(game)
-    dx, dy = action_vec
-    if (dx, dy) == (0, -1):
-        return "move_up"
-    if (dx, dy) == (1, 0):
-        return "move_right"
-    if (dx, dy) == (0, 1):
-        return "move_down"
-    if (dx, dy) == (-1, 0):
-        return "move_left"
-    return "stay"
-
-
-def _pipe_catcher_decide(game, idx):
-    state = game._state_for_catcher(idx)
-    mask = game._action_mask_for_catcher(idx)
-    action_idx = game.dqn_catchers.act(state, valid_mask=mask, eval_mode=True)
-    return _pipe_action_name(action_idx)
-
-
-def _pipe_decider(default_role, catcher_index, allow_unknown):
-    def decide(rows, meta):
-        role = meta.get("role", default_role).lower()
-        idx_override = meta.get("id")
-        idx_val = catcher_index
-        if idx_override is not None:
-            try:
-                idx_val = int(idx_override)
-            except ValueError:
-                idx_val = catcher_index
-
-        game = _pipe_build_game_from_rows(rows, allow_unknown=allow_unknown)
-        if game is None:
-            return "stay"
-
-        if role == "runner":
-            return _pipe_runner_decide(game)
-        if not game.catchers:
-            return "stay"
-        idx_val = max(0, min(idx_val, len(game.catchers) - 1))
-        return _pipe_catcher_decide(game, idx_val)
-
-    return decide
-
-
-def run_pipe_agent(role="catcher", catcher_index=0, allow_unknown=False, stream=None, out=None):
-    """
-    Pipe loop used by the Godot integration.
-    - Godot sends a metadata line (role, id) and the vision grid rows.
-    - We reconstruct an EscapeGame snapshot and use AStarRunner/DQNAgent for decisions.
-    """
-    pipe_io.run_loop(
-        _pipe_decider(role, catcher_index=catcher_index, allow_unknown=allow_unknown),
-        stream=stream,
-        out=out,
-    )
-
 
 # ============================
 # GAME
@@ -1475,7 +1328,7 @@ def run_pipe_agent(role="catcher", catcher_index=0, allow_unknown=False, stream=
 
 def play_loop():
     if pygame is None:
-        print("For visualization install pygame: pip install pygame")
+        logger.error("For visualization install pygame: pip install pygame")
         return
 
     mode = input("Runner: [1] A*  [2] Human: ").strip()
