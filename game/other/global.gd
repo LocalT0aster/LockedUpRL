@@ -29,10 +29,10 @@ var state_dict := {
 
 func get_state(world : TileMapLayer, rect: Rect2i) -> String:
 	var state: String = ""
-	for i in rect.size.x:
-		for j in rect.size.y:
-			var a_coords = world.get_cell_atlas_coords(Vector2i(i,j) + rect.position)
+	for y in rect.size.y:
+		for x in rect.size.x:
+			var a_coords = world.get_cell_atlas_coords(Vector2i(x, y) + rect.position)
 			state += state_dict[a_coords] + " "
 		state += "\n"
-	print(state)
+	# print(state)
 	return state

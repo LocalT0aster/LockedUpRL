@@ -736,15 +736,21 @@ class EscapeGame:
     def _action_mask_for_catcher(self, idx):
         mask = np.zeros(len(ACTIONS), dtype=np.uint8)
         cx, cy = self.catchers[idx]
+
+        def cell_free_for_catcher(x, y):
+            return (
+                0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE and
+                self.grid[y, x] == 0 and (x, y) != self.runner_pos and (x, y) not in self.catchers
+            )
+
         for i, (dx, dy, kind) in enumerate(ACTIONS):
             if kind == 'move':
                 nx, ny = cx + dx, cy + dy
-                if self._valid_free(nx, ny):
+                if cell_free_for_catcher(nx, ny):
                     mask[i] = 1
             elif kind == 'block':
                 bx, by = cx + dx, cy + dy
-                if (0 <= bx < GRID_SIZE and 0 <= by < GRID_SIZE and
-                    self.grid[by, bx] == 0 and (bx, by) != self.runner_pos and (bx, by) not in self.catchers):
+                if cell_free_for_catcher(bx, by):
                     mask[i] = 1
             else:  # stay
                 mask[i] = 1
@@ -1259,15 +1265,33 @@ def _pipe_catcher_decide(game, idx):
     state = game._state_for_catcher(idx)
     mask = game._action_mask_for_catcher(idx)
     action_idx = game.dqn_catchers.act(state, valid_mask=mask, eval_mode=True)
+    cx, cy = game.catchers[idx]
+
+    def _is_valid_move(ai):
+        dx, dy, kind = ACTIONS[ai]
+        if kind == "move":
+            return game._valid_free(cx + dx, cy + dy)
+        if kind == "block":
+            bx, by = cx + dx, cy + dy
+            return (
+                0 <= bx < GRID_SIZE and 0 <= by < GRID_SIZE and
+                game.grid[by, bx] == 0 and (bx, by) != game.runner_pos and (bx, by) not in game.catchers
+            )
+        return True  # stay
+
     # If the chosen action is invalid, fall back to a valid one or stay.
-    if not mask[action_idx]:
-        valid_indices = [i for i, m in enumerate(mask) if m]
+    if not mask[action_idx] or not _is_valid_move(action_idx):
+        valid_indices = [i for i, m in enumerate(mask) if m and _is_valid_move(i)]
         if valid_indices:
             action_idx = valid_indices[0]
         else:
             action_idx = len(ACTIONS) - 1  # stay
+
     act_name = _pipe_action_name(action_idx)
-    logger.info("[pipe] catcher=%d action=%s mask=%s", idx, act_name, mask.tolist())
+    logger.info(
+        "[pipe] catcher=%d pos=(%d,%d) action=%s mask=%s",
+        idx, cx, cy, act_name, mask.tolist()
+    )
     return act_name
 
 

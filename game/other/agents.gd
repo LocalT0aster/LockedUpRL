@@ -122,13 +122,19 @@ func _request_model_action(agent: Agent) -> void:
 	awaiting_action = true
 
 	var meta := _build_meta_line(agent)
-	var rows := _build_rows()
+	var rows := _build_rows(agent.character)
 	Model.send_data(meta, rows)
 
 
-func _build_rows() -> PackedStringArray:
+func _build_rows(type: String = "") -> PackedStringArray:
 	var rows := PackedStringArray()
-	var state := Global.get_state(world, world.get_used_rect())
+	var map := world
+	match type:
+		"CHASER":
+			map = c_vis
+		"RUNNER":
+			map = r_vis
+	var state := Global.get_state(map, map.get_used_rect())
 	for line in state.strip_edges(true, true).split("\n", false):
 		var trimmed := line.strip_edges(true, true)
 		if trimmed != "":

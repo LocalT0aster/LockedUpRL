@@ -80,10 +80,9 @@ func _reader_loop() -> void:
 				_mutex.unlock()
 			had_data = true
 
+		# Drop stderr lines to avoid flooding Godot warnings.
 		if _stderr_io and not _stderr_io.eof_reached():
-			var err_line := _stderr_io.get_line().strip_edges()
-			if err_line != "":
-				call_deferred("_emit_stderr", err_line)
+			_stderr_io.get_line()
 			had_data = true
 
 		if not had_data:
