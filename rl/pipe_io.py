@@ -20,6 +20,15 @@ try:
 except Exception:  # pragma: no cover - fallback if import fails
     setup_logging = None
 
+# Ensure standard streams decode/encode UTF-8 safely, even if the launcher sets a different locale.
+for _stream_name in ("stdin", "stdout"):
+    _stream = getattr(sys, _stream_name, None)
+    if _stream and hasattr(_stream, "reconfigure"):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
 # Ensure logging is configured even if escape_game didn't set it up yet.
 if not logging.getLogger().handlers and setup_logging is not None:
     setup_logging()
