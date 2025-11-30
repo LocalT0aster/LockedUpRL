@@ -1,0 +1,2824 @@
+{
+  "metadata": {
+    "total_episodes": 100,
+    "training_time": "0:01:50.101649",
+    "best_reward": 52.6,
+    "best_episode": 54,
+    "completion_time": "2025-11-29T21:35:58.127330"
+  },
+  "final_stats": {
+    "total_episodes": 100,
+    "recent_episodes": 100,
+    "catchers_win_rate": 0.0,
+    "runner_win_rate": 0.45,
+    "draw_rate": 0.55,
+    "avg_reward": -14466.869999999897,
+    "avg_steps": 423.15,
+    "std_reward": 8497.378442619745,
+    "best_reward": 52.6,
+    "best_episode": 54,
+    "training_time": "0:01:50.101649"
+  },
+  "episode_data": [
+    {
+      "episode": 1,
+      "total_reward": -39.39999999999999,
+      "steps": 5,
+      "result": "runner",
+      "epsilon": 0.9999985,
+      "timestamp": "2025-11-29T21:34:08.066142",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        9,
+        26
+      ],
+      "catchers_positions": [
+        [
+          30,
+          10
+        ],
+        [
+          21,
+          16
+        ],
+        [
+          13,
+          13
+        ]
+      ]
+    },
+    {
+      "episode": 2,
+      "total_reward": -19700.999999999858,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9997735,
+      "timestamp": "2025-11-29T21:34:08.909291",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        15,
+        15
+      ],
+      "catchers_positions": [
+        [
+          18,
+          1
+        ],
+        [
+          21,
+          23
+        ],
+        [
+          8,
+          5
+        ]
+      ]
+    },
+    {
+      "episode": 3,
+      "total_reward": -21007.999999999836,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9995485,
+      "timestamp": "2025-11-29T21:34:10.094531",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        25,
+        10
+      ],
+      "catchers_positions": [
+        [
+          27,
+          11
+        ],
+        [
+          25,
+          19
+        ],
+        [
+          24,
+          27
+        ]
+      ]
+    },
+    {
+      "episode": 4,
+      "total_reward": -22077.99999999982,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9993235,
+      "timestamp": "2025-11-29T21:34:10.776138",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        21,
+        22
+      ],
+      "catchers_positions": [
+        [
+          11,
+          9
+        ],
+        [
+          4,
+          30
+        ],
+        [
+          1,
+          15
+        ]
+      ]
+    },
+    {
+      "episode": 5,
+      "total_reward": -21492.999999999833,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9990985,
+      "timestamp": "2025-11-29T21:34:11.455478",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        18,
+        4
+      ],
+      "catchers_positions": [
+        [
+          5,
+          11
+        ],
+        [
+          30,
+          24
+        ],
+        [
+          19,
+          18
+        ]
+      ]
+    },
+    {
+      "episode": 6,
+      "total_reward": -21248.999999999833,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9988735,
+      "timestamp": "2025-11-29T21:34:12.557847",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        6,
+        10
+      ],
+      "catchers_positions": [
+        [
+          24,
+          13
+        ],
+        [
+          19,
+          18
+        ],
+        [
+          12,
+          27
+        ]
+      ]
+    },
+    {
+      "episode": 7,
+      "total_reward": -1454.7999999999981,
+      "steps": 109,
+      "result": "runner",
+      "epsilon": 0.998833,
+      "timestamp": "2025-11-29T21:34:12.801937",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        4,
+        26
+      ],
+      "catchers_positions": [
+        [
+          13,
+          9
+        ],
+        [
+          18,
+          13
+        ],
+        [
+          17,
+          24
+        ]
+      ]
+    },
+    {
+      "episode": 8,
+      "total_reward": -14782.999999999925,
+      "steps": 421,
+      "result": "runner",
+      "epsilon": 0.9986755,
+      "timestamp": "2025-11-29T21:34:13.670821",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        29,
+        30
+      ],
+      "catchers_positions": [
+        [
+          26,
+          2
+        ],
+        [
+          13,
+          5
+        ],
+        [
+          12,
+          30
+        ]
+      ]
+    },
+    {
+      "episode": 9,
+      "total_reward": -20560.999999999844,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9984505,
+      "timestamp": "2025-11-29T21:34:14.974091",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        20,
+        26
+      ],
+      "catchers_positions": [
+        [
+          19,
+          6
+        ],
+        [
+          2,
+          21
+        ],
+        [
+          5,
+          22
+        ]
+      ]
+    },
+    {
+      "episode": 10,
+      "total_reward": -21353.999999999833,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9982255,
+      "timestamp": "2025-11-29T21:34:16.691012",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        12,
+        15
+      ],
+      "catchers_positions": [
+        [
+          19,
+          5
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          28,
+          27
+        ]
+      ]
+    },
+    {
+      "episode": 11,
+      "total_reward": -1259.599999999999,
+      "steps": 77,
+      "result": "runner",
+      "epsilon": 0.998197,
+      "timestamp": "2025-11-29T21:34:16.840696",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        11,
+        21
+      ],
+      "catchers_positions": [
+        [
+          29,
+          25
+        ],
+        [
+          23,
+          19
+        ],
+        [
+          21,
+          29
+        ]
+      ]
+    },
+    {
+      "episode": 12,
+      "total_reward": -20789.99999999984,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.997972,
+      "timestamp": "2025-11-29T21:34:18.150796",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        3,
+        29
+      ],
+      "catchers_positions": [
+        [
+          16,
+          25
+        ],
+        [
+          21,
+          12
+        ],
+        [
+          20,
+          17
+        ]
+      ]
+    },
+    {
+      "episode": 13,
+      "total_reward": -20763.99999999984,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.997747,
+      "timestamp": "2025-11-29T21:34:19.365753",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        29,
+        15
+      ],
+      "catchers_positions": [
+        [
+          20,
+          28
+        ],
+        [
+          5,
+          24
+        ],
+        [
+          26,
+          21
+        ]
+      ]
+    },
+    {
+      "episode": 14,
+      "total_reward": -21017.99999999984,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.997522,
+      "timestamp": "2025-11-29T21:34:20.986133",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        5,
+        28
+      ],
+      "catchers_positions": [
+        [
+          10,
+          22
+        ],
+        [
+          6,
+          10
+        ],
+        [
+          10,
+          1
+        ]
+      ]
+    },
+    {
+      "episode": 15,
+      "total_reward": -20742.99999999984,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.997297,
+      "timestamp": "2025-11-29T21:34:22.850856",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        4,
+        18
+      ],
+      "catchers_positions": [
+        [
+          18,
+          15
+        ],
+        [
+          16,
+          26
+        ],
+        [
+          9,
+          12
+        ]
+      ]
+    },
+    {
+      "episode": 16,
+      "total_reward": -150.40000000000026,
+      "steps": 45,
+      "result": "runner",
+      "epsilon": 0.9972805,
+      "timestamp": "2025-11-29T21:34:22.962820",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        17,
+        29
+      ],
+      "catchers_positions": [
+        [
+          29,
+          11
+        ],
+        [
+          5,
+          20
+        ],
+        [
+          6,
+          9
+        ]
+      ]
+    },
+    {
+      "episode": 17,
+      "total_reward": -16770.799999999897,
+      "steps": 489,
+      "result": "runner",
+      "epsilon": 0.9970975,
+      "timestamp": "2025-11-29T21:34:24.195542",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        12,
+        21
+      ],
+      "catchers_positions": [
+        [
+          28,
+          11
+        ],
+        [
+          20,
+          1
+        ],
+        [
+          10,
+          2
+        ]
+      ]
+    },
+    {
+      "episode": 18,
+      "total_reward": -11999.999999999965,
+      "steps": 361,
+      "result": "runner",
+      "epsilon": 0.9969625,
+      "timestamp": "2025-11-29T21:34:25.043082",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        29,
+        19
+      ],
+      "catchers_positions": [
+        [
+          12,
+          25
+        ],
+        [
+          17,
+          26
+        ],
+        [
+          16,
+          10
+        ]
+      ]
+    },
+    {
+      "episode": 19,
+      "total_reward": -11786.19999999997,
+      "steps": 333,
+      "result": "runner",
+      "epsilon": 0.996838,
+      "timestamp": "2025-11-29T21:34:25.929844",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        26,
+        30
+      ],
+      "catchers_positions": [
+        [
+          6,
+          26
+        ],
+        [
+          26,
+          10
+        ],
+        [
+          7,
+          2
+        ]
+      ]
+    },
+    {
+      "episode": 20,
+      "total_reward": 8.20000000000001,
+      "steps": 9,
+      "result": "runner",
+      "epsilon": 0.996835,
+      "timestamp": "2025-11-29T21:34:25.950887",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        17,
+        11
+      ],
+      "catchers_positions": [
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          18,
+          25
+        ]
+      ]
+    },
+    {
+      "episode": 21,
+      "total_reward": 27.40000000000002,
+      "steps": 37,
+      "result": "runner",
+      "epsilon": 0.9968215,
+      "timestamp": "2025-11-29T21:34:26.054377",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        5,
+        25
+      ],
+      "catchers_positions": [
+        [
+          20,
+          19
+        ],
+        [
+          26,
+          24
+        ],
+        [
+          18,
+          24
+        ]
+      ]
+    },
+    {
+      "episode": 22,
+      "total_reward": -20935.99999999984,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9965965,
+      "timestamp": "2025-11-29T21:34:28.038526",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        4,
+        18
+      ],
+      "catchers_positions": [
+        [
+          19,
+          5
+        ],
+        [
+          29,
+          21
+        ],
+        [
+          12,
+          11
+        ]
+      ]
+    },
+    {
+      "episode": 23,
+      "total_reward": -21956.999999999825,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9963715,
+      "timestamp": "2025-11-29T21:34:29.621033",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        13,
+        6
+      ],
+      "catchers_positions": [
+        [
+          6,
+          18
+        ],
+        [
+          13,
+          28
+        ],
+        [
+          26,
+          30
+        ]
+      ]
+    },
+    {
+      "episode": 24,
+      "total_reward": -21559.99999999983,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9961465,
+      "timestamp": "2025-11-29T21:34:31.243863",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        16,
+        17
+      ],
+      "catchers_positions": [
+        [
+          2,
+          30
+        ],
+        [
+          28,
+          27
+        ],
+        [
+          30,
+          2
+        ]
+      ]
+    },
+    {
+      "episode": 25,
+      "total_reward": -21053.999999999836,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9959215,
+      "timestamp": "2025-11-29T21:34:32.934775",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        21,
+        10
+      ],
+      "catchers_positions": [
+        [
+          11,
+          26
+        ],
+        [
+          11,
+          7
+        ],
+        [
+          26,
+          25
+        ]
+      ]
+    },
+    {
+      "episode": 26,
+      "total_reward": -18845.99999999987,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9956965,
+      "timestamp": "2025-11-29T21:34:34.920829",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        14,
+        19
+      ],
+      "catchers_positions": [
+        [
+          22,
+          26
+        ],
+        [
+          16,
+          7
+        ],
+        [
+          2,
+          16
+        ]
+      ]
+    },
+    {
+      "episode": 27,
+      "total_reward": -39.19999999999999,
+      "steps": 13,
+      "result": "runner",
+      "epsilon": 0.995692,
+      "timestamp": "2025-11-29T21:34:34.959012",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        16,
+        23
+      ],
+      "catchers_positions": [
+        [
+          8,
+          18
+        ],
+        [
+          9,
+          22
+        ],
+        [
+          19,
+          1
+        ]
+      ]
+    },
+    {
+      "episode": 28,
+      "total_reward": -19963.999999999854,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.995467,
+      "timestamp": "2025-11-29T21:34:36.365460",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        28,
+        26
+      ],
+      "catchers_positions": [
+        [
+          23,
+          25
+        ],
+        [
+          22,
+          28
+        ],
+        [
+          25,
+          13
+        ]
+      ]
+    },
+    {
+      "episode": 29,
+      "total_reward": 1.6000000000000023,
+      "steps": 5,
+      "result": "runner",
+      "epsilon": 0.9954655,
+      "timestamp": "2025-11-29T21:34:36.382448",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        19,
+        10
+      ],
+      "catchers_positions": [
+        [
+          6,
+          14
+        ],
+        [
+          2,
+          7
+        ],
+        [
+          13,
+          19
+        ]
+      ]
+    },
+    {
+      "episode": 30,
+      "total_reward": -22103.99999999982,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9952405,
+      "timestamp": "2025-11-29T21:34:38.492801",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        25,
+        17
+      ],
+      "catchers_positions": [
+        [
+          21,
+          8
+        ],
+        [
+          7,
+          17
+        ],
+        [
+          23,
+          30
+        ]
+      ]
+    },
+    {
+      "episode": 31,
+      "total_reward": -21523.99999999983,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9950155,
+      "timestamp": "2025-11-29T21:34:40.328780",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        10,
+        8
+      ],
+      "catchers_positions": [
+        [
+          11,
+          9
+        ],
+        [
+          23,
+          22
+        ],
+        [
+          21,
+          24
+        ]
+      ]
+    },
+    {
+      "episode": 32,
+      "total_reward": -21941.999999999825,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9947905,
+      "timestamp": "2025-11-29T21:34:41.931667",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        13,
+        1
+      ],
+      "catchers_positions": [
+        [
+          20,
+          29
+        ],
+        [
+          10,
+          6
+        ],
+        [
+          22,
+          14
+        ]
+      ]
+    },
+    {
+      "episode": 33,
+      "total_reward": -20941.99999999984,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9945655,
+      "timestamp": "2025-11-29T21:34:43.825427",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        23,
+        29
+      ],
+      "catchers_positions": [
+        [
+          4,
+          16
+        ],
+        [
+          4,
+          23
+        ],
+        [
+          9,
+          13
+        ]
+      ]
+    },
+    {
+      "episode": 34,
+      "total_reward": -22177.99999999982,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9943405,
+      "timestamp": "2025-11-29T21:34:45.327738",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        10,
+        4
+      ],
+      "catchers_positions": [
+        [
+          18,
+          7
+        ],
+        [
+          16,
+          24
+        ],
+        [
+          17,
+          30
+        ]
+      ]
+    },
+    {
+      "episode": 35,
+      "total_reward": -21180.999999999836,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9941155,
+      "timestamp": "2025-11-29T21:34:46.802749",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        23,
+        4
+      ],
+      "catchers_positions": [
+        [
+          30,
+          18
+        ],
+        [
+          5,
+          28
+        ],
+        [
+          30,
+          8
+        ]
+      ]
+    },
+    {
+      "episode": 36,
+      "total_reward": -21287.999999999833,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9938905,
+      "timestamp": "2025-11-29T21:34:48.453423",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        23,
+        14
+      ],
+      "catchers_positions": [
+        [
+          28,
+          25
+        ],
+        [
+          10,
+          27
+        ],
+        [
+          20,
+          30
+        ]
+      ]
+    },
+    {
+      "episode": 37,
+      "total_reward": -4514.400000000007,
+      "steps": 165,
+      "result": "runner",
+      "epsilon": 0.993829,
+      "timestamp": "2025-11-29T21:34:48.844184",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        15,
+        27
+      ],
+      "catchers_positions": [
+        [
+          1,
+          2
+        ],
+        [
+          17,
+          9
+        ],
+        [
+          9,
+          21
+        ]
+      ]
+    },
+    {
+      "episode": 38,
+      "total_reward": -1764.199999999999,
+      "steps": 73,
+      "result": "runner",
+      "epsilon": 0.993802,
+      "timestamp": "2025-11-29T21:34:49.022936",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        18,
+        22
+      ],
+      "catchers_positions": [
+        [
+          18,
+          3
+        ],
+        [
+          28,
+          2
+        ],
+        [
+          26,
+          6
+        ]
+      ]
+    },
+    {
+      "episode": 39,
+      "total_reward": -20529.999999999844,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.993577,
+      "timestamp": "2025-11-29T21:34:50.593900",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        12,
+        10
+      ],
+      "catchers_positions": [
+        [
+          28,
+          13
+        ],
+        [
+          3,
+          10
+        ],
+        [
+          2,
+          24
+        ]
+      ]
+    },
+    {
+      "episode": 40,
+      "total_reward": -6823.0000000000155,
+      "steps": 241,
+      "result": "runner",
+      "epsilon": 0.993487,
+      "timestamp": "2025-11-29T21:34:51.162713",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        27,
+        22
+      ],
+      "catchers_positions": [
+        [
+          28,
+          6
+        ],
+        [
+          18,
+          8
+        ],
+        [
+          18,
+          19
+        ]
+      ]
+    },
+    {
+      "episode": 41,
+      "total_reward": -17047.999999999894,
+      "steps": 521,
+      "result": "runner",
+      "epsilon": 0.993292,
+      "timestamp": "2025-11-29T21:34:52.476887",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        26,
+        21
+      ],
+      "catchers_positions": [
+        [
+          18,
+          24
+        ],
+        [
+          11,
+          21
+        ],
+        [
+          12,
+          5
+        ]
+      ]
+    },
+    {
+      "episode": 42,
+      "total_reward": -13337.599999999946,
+      "steps": 377,
+      "result": "runner",
+      "epsilon": 0.993151,
+      "timestamp": "2025-11-29T21:34:53.444157",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        12,
+        14
+      ],
+      "catchers_positions": [
+        [
+          30,
+          26
+        ],
+        [
+          19,
+          29
+        ],
+        [
+          2,
+          15
+        ]
+      ]
+    },
+    {
+      "episode": 43,
+      "total_reward": -514.0000000000001,
+      "steps": 41,
+      "result": "runner",
+      "epsilon": 0.993136,
+      "timestamp": "2025-11-29T21:34:53.559730",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        19,
+        4
+      ],
+      "catchers_positions": [
+        [
+          30,
+          30
+        ],
+        [
+          22,
+          29
+        ],
+        [
+          20,
+          17
+        ]
+      ]
+    },
+    {
+      "episode": 44,
+      "total_reward": -20954.99999999984,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.992911,
+      "timestamp": "2025-11-29T21:34:55.285485",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        2,
+        2
+      ],
+      "catchers_positions": [
+        [
+          28,
+          17
+        ],
+        [
+          28,
+          5
+        ],
+        [
+          15,
+          26
+        ]
+      ]
+    },
+    {
+      "episode": 45,
+      "total_reward": -21451.99999999983,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.992686,
+      "timestamp": "2025-11-29T21:34:57.055534",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        19,
+        10
+      ],
+      "catchers_positions": [
+        [
+          10,
+          11
+        ],
+        [
+          2,
+          10
+        ],
+        [
+          18,
+          20
+        ]
+      ]
+    },
+    {
+      "episode": 46,
+      "total_reward": -6364.400000000014,
+      "steps": 245,
+      "result": "runner",
+      "epsilon": 0.9925945,
+      "timestamp": "2025-11-29T21:34:57.631603",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        23,
+        18
+      ],
+      "catchers_positions": [
+        [
+          18,
+          5
+        ],
+        [
+          13,
+          16
+        ],
+        [
+          4,
+          2
+        ]
+      ]
+    },
+    {
+      "episode": 47,
+      "total_reward": -22292.999999999818,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9923695,
+      "timestamp": "2025-11-29T21:34:59.083621",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        3,
+        27
+      ],
+      "catchers_positions": [
+        [
+          17,
+          21
+        ],
+        [
+          28,
+          1
+        ],
+        [
+          8,
+          7
+        ]
+      ]
+    },
+    {
+      "episode": 48,
+      "total_reward": -18026.79999999988,
+      "steps": 529,
+      "result": "runner",
+      "epsilon": 0.9921715,
+      "timestamp": "2025-11-29T21:35:00.323365",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        23,
+        11
+      ],
+      "catchers_positions": [
+        [
+          27,
+          22
+        ],
+        [
+          6,
+          6
+        ],
+        [
+          2,
+          11
+        ]
+      ]
+    },
+    {
+      "episode": 49,
+      "total_reward": -21260.999999999833,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9919465,
+      "timestamp": "2025-11-29T21:35:01.951953",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        26,
+        5
+      ],
+      "catchers_positions": [
+        [
+          2,
+          14
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          4,
+          21
+        ]
+      ]
+    },
+    {
+      "episode": 50,
+      "total_reward": 10.600000000000005,
+      "steps": 5,
+      "result": "runner",
+      "epsilon": 0.991945,
+      "timestamp": "2025-11-29T21:35:01.969953",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        29,
+        23
+      ],
+      "catchers_positions": [
+        [
+          20,
+          4
+        ],
+        [
+          17,
+          7
+        ],
+        [
+          7,
+          26
+        ]
+      ]
+    },
+    {
+      "episode": 51,
+      "total_reward": -21049.999999999836,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.99172,
+      "timestamp": "2025-11-29T21:35:03.801053",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        7,
+        25
+      ],
+      "catchers_positions": [
+        [
+          23,
+          23
+        ],
+        [
+          18,
+          22
+        ],
+        [
+          21,
+          3
+        ]
+      ]
+    },
+    {
+      "episode": 52,
+      "total_reward": -20887.99999999984,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.991495,
+      "timestamp": "2025-11-29T21:35:05.535443",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        29,
+        7
+      ],
+      "catchers_positions": [
+        [
+          19,
+          19
+        ],
+        [
+          27,
+          27
+        ],
+        [
+          1,
+          25
+        ]
+      ]
+    },
+    {
+      "episode": 53,
+      "total_reward": -22391.999999999818,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.99127,
+      "timestamp": "2025-11-29T21:35:07.309839",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        2,
+        23
+      ],
+      "catchers_positions": [
+        [
+          20,
+          15
+        ],
+        [
+          16,
+          1
+        ],
+        [
+          18,
+          2
+        ]
+      ]
+    },
+    {
+      "episode": 54,
+      "total_reward": 52.6,
+      "steps": 5,
+      "result": "runner",
+      "epsilon": 0.9912685,
+      "timestamp": "2025-11-29T21:35:07.317391",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        12,
+        16
+      ],
+      "catchers_positions": [
+        [
+          18,
+          5
+        ],
+        [
+          18,
+          9
+        ],
+        [
+          10,
+          12
+        ]
+      ]
+    },
+    {
+      "episode": 55,
+      "total_reward": -3475.800000000004,
+      "steps": 109,
+      "result": "runner",
+      "epsilon": 0.991228,
+      "timestamp": "2025-11-29T21:35:07.602685",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        8,
+        24
+      ],
+      "catchers_positions": [
+        [
+          9,
+          15
+        ],
+        [
+          13,
+          20
+        ],
+        [
+          14,
+          21
+        ]
+      ]
+    },
+    {
+      "episode": 56,
+      "total_reward": -177.59999999999997,
+      "steps": 17,
+      "result": "runner",
+      "epsilon": 0.991222,
+      "timestamp": "2025-11-29T21:35:07.650467",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        27,
+        29
+      ],
+      "catchers_positions": [
+        [
+          24,
+          30
+        ],
+        [
+          5,
+          12
+        ],
+        [
+          17,
+          8
+        ]
+      ]
+    },
+    {
+      "episode": 57,
+      "total_reward": -21203.999999999836,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.990997,
+      "timestamp": "2025-11-29T21:35:09.152839",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        2,
+        19
+      ],
+      "catchers_positions": [
+        [
+          6,
+          1
+        ],
+        [
+          29,
+          2
+        ],
+        [
+          14,
+          7
+        ]
+      ]
+    },
+    {
+      "episode": 58,
+      "total_reward": -22005.999999999825,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.990772,
+      "timestamp": "2025-11-29T21:35:10.960180",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        2,
+        2
+      ],
+      "catchers_positions": [
+        [
+          15,
+          1
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          16,
+          23
+        ]
+      ]
+    },
+    {
+      "episode": 59,
+      "total_reward": -18948.99999999987,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.990547,
+      "timestamp": "2025-11-29T21:35:12.811332",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        7,
+        2
+      ],
+      "catchers_positions": [
+        [
+          8,
+          12
+        ],
+        [
+          18,
+          17
+        ],
+        [
+          4,
+          1
+        ]
+      ]
+    },
+    {
+      "episode": 60,
+      "total_reward": -10297.599999999991,
+      "steps": 297,
+      "result": "runner",
+      "epsilon": 0.990436,
+      "timestamp": "2025-11-29T21:35:13.565341",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        14,
+        16
+      ],
+      "catchers_positions": [
+        [
+          20,
+          6
+        ],
+        [
+          8,
+          24
+        ],
+        [
+          11,
+          25
+        ]
+      ]
+    },
+    {
+      "episode": 61,
+      "total_reward": -21695.99999999983,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.990211,
+      "timestamp": "2025-11-29T21:35:15.243931",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        1,
+        19
+      ],
+      "catchers_positions": [
+        [
+          12,
+          19
+        ],
+        [
+          27,
+          20
+        ],
+        [
+          6,
+          5
+        ]
+      ]
+    },
+    {
+      "episode": 62,
+      "total_reward": -74.99999999999997,
+      "steps": 21,
+      "result": "runner",
+      "epsilon": 0.9902035,
+      "timestamp": "2025-11-29T21:35:15.327557",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        7,
+        17
+      ],
+      "catchers_positions": [
+        [
+          7,
+          12
+        ],
+        [
+          8,
+          19
+        ],
+        [
+          25,
+          16
+        ]
+      ]
+    },
+    {
+      "episode": 63,
+      "total_reward": -1495.5999999999992,
+      "steps": 57,
+      "result": "runner",
+      "epsilon": 0.9901825,
+      "timestamp": "2025-11-29T21:35:15.471467",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        17,
+        25
+      ],
+      "catchers_positions": [
+        [
+          23,
+          25
+        ],
+        [
+          3,
+          16
+        ],
+        [
+          19,
+          23
+        ]
+      ]
+    },
+    {
+      "episode": 64,
+      "total_reward": -21033.999999999836,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9899575,
+      "timestamp": "2025-11-29T21:35:17.187044",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        7,
+        22
+      ],
+      "catchers_positions": [
+        [
+          6,
+          7
+        ],
+        [
+          30,
+          19
+        ],
+        [
+          6,
+          15
+        ]
+      ]
+    },
+    {
+      "episode": 65,
+      "total_reward": -21155.999999999836,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9897325,
+      "timestamp": "2025-11-29T21:35:18.783172",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        8,
+        27
+      ],
+      "catchers_positions": [
+        [
+          5,
+          15
+        ],
+        [
+          21,
+          29
+        ],
+        [
+          28,
+          20
+        ]
+      ]
+    },
+    {
+      "episode": 66,
+      "total_reward": -2548.6000000000004,
+      "steps": 97,
+      "result": "runner",
+      "epsilon": 0.9896965,
+      "timestamp": "2025-11-29T21:35:19.016621",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        7,
+        8
+      ],
+      "catchers_positions": [
+        [
+          23,
+          11
+        ],
+        [
+          5,
+          23
+        ],
+        [
+          23,
+          1
+        ]
+      ]
+    },
+    {
+      "episode": 67,
+      "total_reward": -22068.99999999982,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9894715,
+      "timestamp": "2025-11-29T21:35:20.627753",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        12,
+        17
+      ],
+      "catchers_positions": [
+        [
+          14,
+          17
+        ],
+        [
+          28,
+          4
+        ],
+        [
+          8,
+          3
+        ]
+      ]
+    },
+    {
+      "episode": 68,
+      "total_reward": -6306.400000000013,
+      "steps": 225,
+      "result": "runner",
+      "epsilon": 0.9893875,
+      "timestamp": "2025-11-29T21:35:21.179827",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        19,
+        10
+      ],
+      "catchers_positions": [
+        [
+          19,
+          21
+        ],
+        [
+          28,
+          13
+        ],
+        [
+          22,
+          23
+        ]
+      ]
+    },
+    {
+      "episode": 69,
+      "total_reward": -20437.999999999844,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9891625,
+      "timestamp": "2025-11-29T21:35:22.817729",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        14,
+        29
+      ],
+      "catchers_positions": [
+        [
+          8,
+          6
+        ],
+        [
+          15,
+          7
+        ],
+        [
+          27,
+          10
+        ]
+      ]
+    },
+    {
+      "episode": 70,
+      "total_reward": -20465.999999999844,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9889375,
+      "timestamp": "2025-11-29T21:35:24.303150",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        5,
+        30
+      ],
+      "catchers_positions": [
+        [
+          6,
+          25
+        ],
+        [
+          17,
+          6
+        ],
+        [
+          30,
+          30
+        ]
+      ]
+    },
+    {
+      "episode": 71,
+      "total_reward": -5017.20000000001,
+      "steps": 193,
+      "result": "runner",
+      "epsilon": 0.9888655,
+      "timestamp": "2025-11-29T21:35:24.767680",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        5,
+        4
+      ],
+      "catchers_positions": [
+        [
+          17,
+          16
+        ],
+        [
+          28,
+          27
+        ],
+        [
+          15,
+          22
+        ]
+      ]
+    },
+    {
+      "episode": 72,
+      "total_reward": -9215.400000000005,
+      "steps": 285,
+      "result": "runner",
+      "epsilon": 0.988759,
+      "timestamp": "2025-11-29T21:35:25.480336",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        25,
+        6
+      ],
+      "catchers_positions": [
+        [
+          15,
+          27
+        ],
+        [
+          23,
+          17
+        ],
+        [
+          25,
+          2
+        ]
+      ]
+    },
+    {
+      "episode": 73,
+      "total_reward": -21906.999999999825,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.988534,
+      "timestamp": "2025-11-29T21:35:27.006587",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        25,
+        9
+      ],
+      "catchers_positions": [
+        [
+          22,
+          17
+        ],
+        [
+          21,
+          2
+        ],
+        [
+          19,
+          8
+        ]
+      ]
+    },
+    {
+      "episode": 74,
+      "total_reward": -11736.999999999969,
+      "steps": 341,
+      "result": "runner",
+      "epsilon": 0.9884065,
+      "timestamp": "2025-11-29T21:35:27.852903",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        19,
+        26
+      ],
+      "catchers_positions": [
+        [
+          21,
+          22
+        ],
+        [
+          25,
+          13
+        ],
+        [
+          7,
+          26
+        ]
+      ]
+    },
+    {
+      "episode": 75,
+      "total_reward": -12381.19999999996,
+      "steps": 373,
+      "result": "runner",
+      "epsilon": 0.988267,
+      "timestamp": "2025-11-29T21:35:28.775481",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        22,
+        9
+      ],
+      "catchers_positions": [
+        [
+          4,
+          14
+        ],
+        [
+          28,
+          26
+        ],
+        [
+          21,
+          6
+        ]
+      ]
+    },
+    {
+      "episode": 76,
+      "total_reward": -9692.8,
+      "steps": 309,
+      "result": "runner",
+      "epsilon": 0.9881515,
+      "timestamp": "2025-11-29T21:35:29.565306",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        1,
+        13
+      ],
+      "catchers_positions": [
+        [
+          20,
+          2
+        ],
+        [
+          16,
+          14
+        ],
+        [
+          30,
+          27
+        ]
+      ]
+    },
+    {
+      "episode": 77,
+      "total_reward": -12892.799999999954,
+      "steps": 389,
+      "result": "runner",
+      "epsilon": 0.988006,
+      "timestamp": "2025-11-29T21:35:30.497535",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        9,
+        29
+      ],
+      "catchers_positions": [
+        [
+          3,
+          14
+        ],
+        [
+          4,
+          18
+        ],
+        [
+          26,
+          13
+        ]
+      ]
+    },
+    {
+      "episode": 78,
+      "total_reward": -11652.99999999997,
+      "steps": 321,
+      "result": "runner",
+      "epsilon": 0.987886,
+      "timestamp": "2025-11-29T21:35:31.316554",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        10,
+        25
+      ],
+      "catchers_positions": [
+        [
+          26,
+          5
+        ],
+        [
+          28,
+          9
+        ],
+        [
+          1,
+          30
+        ]
+      ]
+    },
+    {
+      "episode": 79,
+      "total_reward": -20928.99999999984,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.987661,
+      "timestamp": "2025-11-29T21:35:32.798515",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        3,
+        20
+      ],
+      "catchers_positions": [
+        [
+          12,
+          6
+        ],
+        [
+          1,
+          8
+        ],
+        [
+          24,
+          26
+        ]
+      ]
+    },
+    {
+      "episode": 80,
+      "total_reward": -800.3999999999994,
+      "steps": 85,
+      "result": "runner",
+      "epsilon": 0.9876295,
+      "timestamp": "2025-11-29T21:35:33.018785",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        24,
+        29
+      ],
+      "catchers_positions": [
+        [
+          9,
+          13
+        ],
+        [
+          26,
+          20
+        ],
+        [
+          5,
+          15
+        ]
+      ]
+    },
+    {
+      "episode": 81,
+      "total_reward": -21893.999999999825,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9874045,
+      "timestamp": "2025-11-29T21:35:34.527359",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        24,
+        28
+      ],
+      "catchers_positions": [
+        [
+          24,
+          9
+        ],
+        [
+          2,
+          22
+        ],
+        [
+          27,
+          14
+        ]
+      ]
+    },
+    {
+      "episode": 82,
+      "total_reward": -520.0,
+      "steps": 41,
+      "result": "runner",
+      "epsilon": 0.9873895,
+      "timestamp": "2025-11-29T21:35:34.642709",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        6,
+        23
+      ],
+      "catchers_positions": [
+        [
+          30,
+          15
+        ],
+        [
+          2,
+          22
+        ],
+        [
+          6,
+          2
+        ]
+      ]
+    },
+    {
+      "episode": 83,
+      "total_reward": -5574.600000000011,
+      "steps": 177,
+      "result": "runner",
+      "epsilon": 0.9873235,
+      "timestamp": "2025-11-29T21:35:35.125422",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        21,
+        22
+      ],
+      "catchers_positions": [
+        [
+          10,
+          6
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          13,
+          2
+        ]
+      ]
+    },
+    {
+      "episode": 84,
+      "total_reward": -21064.999999999836,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9870985,
+      "timestamp": "2025-11-29T21:35:36.680536",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        20,
+        7
+      ],
+      "catchers_positions": [
+        [
+          23,
+          29
+        ],
+        [
+          30,
+          21
+        ],
+        [
+          3,
+          18
+        ]
+      ]
+    },
+    {
+      "episode": 85,
+      "total_reward": -20696.999999999844,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9868735,
+      "timestamp": "2025-11-29T21:35:38.609000",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        22,
+        26
+      ],
+      "catchers_positions": [
+        [
+          21,
+          2
+        ],
+        [
+          27,
+          20
+        ],
+        [
+          22,
+          16
+        ]
+      ]
+    },
+    {
+      "episode": 86,
+      "total_reward": -18509.999999999873,
+      "steps": 541,
+      "result": "runner",
+      "epsilon": 0.986671,
+      "timestamp": "2025-11-29T21:35:40.013717",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        26,
+        29
+      ],
+      "catchers_positions": [
+        [
+          8,
+          28
+        ],
+        [
+          12,
+          19
+        ],
+        [
+          4,
+          10
+        ]
+      ]
+    },
+    {
+      "episode": 87,
+      "total_reward": 0.6000000000000028,
+      "steps": 5,
+      "result": "runner",
+      "epsilon": 0.9866695,
+      "timestamp": "2025-11-29T21:35:40.031725",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        23,
+        29
+      ],
+      "catchers_positions": [
+        [
+          22,
+          1
+        ],
+        [
+          10,
+          12
+        ],
+        [
+          4,
+          4
+        ]
+      ]
+    },
+    {
+      "episode": 88,
+      "total_reward": -21027.999999999836,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9864445,
+      "timestamp": "2025-11-29T21:35:41.765366",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        5,
+        19
+      ],
+      "catchers_positions": [
+        [
+          22,
+          1
+        ],
+        [
+          6,
+          15
+        ],
+        [
+          20,
+          18
+        ]
+      ]
+    },
+    {
+      "episode": 89,
+      "total_reward": -20128.999999999854,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9862195,
+      "timestamp": "2025-11-29T21:35:43.310953",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        18,
+        28
+      ],
+      "catchers_positions": [
+        [
+          1,
+          13
+        ],
+        [
+          13,
+          1
+        ],
+        [
+          24,
+          28
+        ]
+      ]
+    },
+    {
+      "episode": 90,
+      "total_reward": -20820.99999999984,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.9859945,
+      "timestamp": "2025-11-29T21:35:45.116896",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        23,
+        5
+      ],
+      "catchers_positions": [
+        [
+          18,
+          11
+        ],
+        [
+          21,
+          14
+        ],
+        [
+          14,
+          25
+        ]
+      ]
+    },
+    {
+      "episode": 91,
+      "total_reward": -11.399999999999997,
+      "steps": 5,
+      "result": "runner",
+      "epsilon": 0.985993,
+      "timestamp": "2025-11-29T21:35:45.132867",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        3,
+        13
+      ],
+      "catchers_positions": [
+        [
+          20,
+          13
+        ],
+        [
+          30,
+          26
+        ],
+        [
+          12,
+          19
+        ]
+      ]
+    },
+    {
+      "episode": 92,
+      "total_reward": -18955.79999999987,
+      "steps": 589,
+      "result": "runner",
+      "epsilon": 0.9857725,
+      "timestamp": "2025-11-29T21:35:46.492862",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        13,
+        8
+      ],
+      "catchers_positions": [
+        [
+          21,
+          21
+        ],
+        [
+          10,
+          18
+        ],
+        [
+          10,
+          27
+        ]
+      ]
+    },
+    {
+      "episode": 93,
+      "total_reward": -2473.8,
+      "steps": 109,
+      "result": "runner",
+      "epsilon": 0.985732,
+      "timestamp": "2025-11-29T21:35:46.755288",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        11,
+        10
+      ],
+      "catchers_positions": [
+        [
+          10,
+          22
+        ],
+        [
+          24,
+          10
+        ],
+        [
+          7,
+          25
+        ]
+      ]
+    },
+    {
+      "episode": 94,
+      "total_reward": -18229.199999999877,
+      "steps": 513,
+      "result": "runner",
+      "epsilon": 0.98554,
+      "timestamp": "2025-11-29T21:35:47.958747",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        27,
+        9
+      ],
+      "catchers_positions": [
+        [
+          23,
+          14
+        ],
+        [
+          17,
+          10
+        ],
+        [
+          30,
+          21
+        ]
+      ]
+    },
+    {
+      "episode": 95,
+      "total_reward": -21049.999999999836,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.985315,
+      "timestamp": "2025-11-29T21:35:49.879707",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        26,
+        26
+      ],
+      "catchers_positions": [
+        [
+          21,
+          30
+        ],
+        [
+          15,
+          1
+        ],
+        [
+          19,
+          14
+        ]
+      ]
+    },
+    {
+      "episode": 96,
+      "total_reward": -20244.99999999985,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.98509,
+      "timestamp": "2025-11-29T21:35:51.498674",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        18,
+        14
+      ],
+      "catchers_positions": [
+        [
+          23,
+          28
+        ],
+        [
+          1,
+          8
+        ],
+        [
+          17,
+          22
+        ]
+      ]
+    },
+    {
+      "episode": 97,
+      "total_reward": -19735.999999999858,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.984865,
+      "timestamp": "2025-11-29T21:35:53.222328",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        13,
+        27
+      ],
+      "catchers_positions": [
+        [
+          13,
+          3
+        ],
+        [
+          26,
+          29
+        ],
+        [
+          25,
+          16
+        ]
+      ]
+    },
+    {
+      "episode": 98,
+      "total_reward": -18588.999999999876,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.98464,
+      "timestamp": "2025-11-29T21:35:54.718789",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        13,
+        19
+      ],
+      "catchers_positions": [
+        [
+          13,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          8,
+          8
+        ]
+      ]
+    },
+    {
+      "episode": 99,
+      "total_reward": -21572.99999999983,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.984415,
+      "timestamp": "2025-11-29T21:35:56.472605",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        4,
+        20
+      ],
+      "catchers_positions": [
+        [
+          28,
+          26
+        ],
+        [
+          14,
+          26
+        ],
+        [
+          7,
+          25
+        ]
+      ]
+    },
+    {
+      "episode": 100,
+      "total_reward": -22333.999999999818,
+      "steps": 602,
+      "result": "draw",
+      "epsilon": 0.98419,
+      "timestamp": "2025-11-29T21:35:58.126319",
+      "blocks_placed": 0,
+      "blocks_successful": 0,
+      "final_runner_pos": [
+        17,
+        22
+      ],
+      "catchers_positions": [
+        [
+          16,
+          28
+        ],
+        [
+          26,
+          25
+        ],
+        [
+          22,
+          10
+        ]
+      ]
+    }
+  ]
+}
