@@ -36,6 +36,8 @@ func _on_child_fished_turn(index : int):
 		active_agent = get_child(index + 1)
 		next_turn.emit(index + 1)
 		get_child(index + 1).set_deferred("active",true)
+	check_chaser_win()
+	Global.get_state(world, world.get_used_rect())
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Input.is_action_pressed("ui_cancel"):
@@ -67,13 +69,9 @@ func spawn_agents():
 		agent_inst.position = Vector2(coord) * Global.TILE_SIZE + Vector2.ONE * 8
 		add_child(agent_inst)
 
-func check_runner_win(coords : Vector2i):
-	if (
-			world.get_cell_atlas_coords(Vector2i(coords)) == Global.tiles.EXIT
-		) and (
-			active_agent.character == "RUNNER"
-		):
-			Global.runner_won.emit()
+#func check_runner_win(_coords : Vector2i):
+	#pass
+	#now located in agent
 
 func check_chaser_win():
 	for agent : Agent in get_children():

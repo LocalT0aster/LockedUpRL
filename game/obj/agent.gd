@@ -3,6 +3,7 @@ extends Node2D
 class_name Agent
 
 signal finished_turn
+signal runner_won
 
 
 @export var world : TileMapLayer
@@ -35,3 +36,5 @@ func go(direction : Vector2i):
 		world.update_astar()
 		vision.update_vision(world, Rect2i(world.local_to_map(position) - vision_size / 2,vision_size))
 		finished_turn.emit(get_index())
+	if world.get_cell_atlas_coords(Vector2i(new_position_cells)) == Global.tiles.EXIT and character == "RUNNER":
+		Global.runner_won.emit()
