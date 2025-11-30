@@ -1155,7 +1155,7 @@ def _pipe_parse_rows(rows):
     return parsed
 
 
-def _pipe_build_game_from_rows(rows, allow_unknown=False):
+def _pipe_build_game_from_rows(rows):
     grid_tokens = _pipe_parse_rows(rows)
     if not grid_tokens:
         return None
@@ -1190,7 +1190,7 @@ def _pipe_build_game_from_rows(rows, allow_unknown=False):
                 game.catchers.append((x, y))
                 game.grid[y, x] = 0
             elif token == PIPE_CELL_UNKNOWN:
-                game.grid[y, x] = 1 if not allow_unknown else 0
+                game.grid[y, x] = 0  # always allow moving into unknown cells
             else:
                 game.grid[y, x] = 0
 
@@ -1252,18 +1252,23 @@ def _pipe_catcher_decide(game, idx):
     return _pipe_action_name(action_idx)
 
 
-def _pipe_decider(default_role, catcher_index, allow_unknown):
+def _pipe_decider():
     def decide(rows, meta):
-        role = meta.get("role", default_role).lower()
+        role_raw = (meta.get("role") or "catcher0").strip().lower()
+        role = "runner" if role_raw.startswith("runner") else "catcher"
+        idx_val = 0
+        if role == "catcher" and role_raw.startswith("catcher"):
+            suffix = role_raw[len("catcher"):]
+            if suffix.isdigit():
+                idx_val = int(suffix)
         idx_override = meta.get("id")
-        idx_val = catcher_index
         if idx_override is not None:
             try:
                 idx_val = int(idx_override)
             except ValueError:
-                idx_val = catcher_index
+                pass
 
-        game = _pipe_build_game_from_rows(rows, allow_unknown=allow_unknown)
+        game = _pipe_build_game_from_rows(rows)
         if game is None:
             return "stay"
 
@@ -1282,45 +1287,13 @@ def run_pipe_agent(stream=None, out=None):
     Pipe loop used by the Godot integration.
     - Godot sends a metadata line (role, id) and the vision grid rows.
     - We reconstruct an EscapeGame snapshot and use AStarRunner/DQNAgent for decisions.
+    - Role (and catcher index) are read from the metadata role string, with optional id override.
     """
     pipe_io.run_loop(
         _pipe_decider(),
         stream=stream,
         out=out,
     )
-
-# ============================
-# Pipe IO integration (Godot)
-# ============================
-
-PIPE_CELL_EMPTY = "_C"
-PIPE_CELL_EXIT = "eC"
-PIPE_CELL_OBSTACLE = "oC"
-PIPE_CELL_RUNNER = "aeC"
-PIPE_CELL_CATCHER = "acC"
-PIPE_CELL_UNKNOWN = "unkC"
-
-_PIPE_TOKEN_MAP = {
-    "_c": PIPE_CELL_EMPTY,
-    "empty": PIPE_CELL_EMPTY,
-    "floor": PIPE_CELL_EMPTY,
-    "ec": PIPE_CELL_EXIT,
-    "exit": PIPE_CELL_EXIT,
-    "oc": PIPE_CELL_OBSTACLE,
-    "block": PIPE_CELL_OBSTACLE,
-    "wall": PIPE_CELL_OBSTACLE,
-    "ae": PIPE_CELL_RUNNER,
-    "aec": PIPE_CELL_RUNNER,
-    "runner": PIPE_CELL_RUNNER,
-    "ac": PIPE_CELL_CATCHER,
-    "acc": PIPE_CELL_CATCHER,
-    "catcher": PIPE_CELL_CATCHER,
-    "unk": PIPE_CELL_UNKNOWN,
-    "unkc": PIPE_CELL_UNKNOWN,
-    "unknown": PIPE_CELL_UNKNOWN,
-}
-
-_PIPE_DQN_AGENT = None
 
 # ============================
 # GAME
